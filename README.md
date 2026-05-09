@@ -1,70 +1,157 @@
-# Getting Started with Create React App
+# ADO Bilet
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+ADO Bilet is a React-based event ticket platform developed as a team project.
 
-## Available Scripts
+The application allows users to browse events, filter listings and manage ticket-related interactions through a responsive and modern user interface.
 
-In the project directory, you can run:
+The project focuses on frontend architecture, responsive UI development, state management and component-based application structure.
 
-### `npm start`
+---
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+# Project Overview
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+This project was developed to practice modern React development workflows and collaborative team-based frontend development.
 
-### `npm test`
+The application includes event listing pages, filtering systems, responsive layouts and admin-focused interfaces designed for ticket platform management.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+---
 
-### `npm run build`
+# Key Features
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+- React-based frontend architecture
+- Responsive UI design
+- Event listing and filtering system
+- Ticket purchase flow interfaces
+- Redux state management
+- Admin panel components
+- Component-based architecture
+- Dynamic page rendering
+- Mobile-friendly layouts
+- Modern frontend development workflow
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+---
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+# Technologies Used
 
-### `npm run eject`
+## Frontend
+- React
+- Redux
+- JavaScript
+- HTML5
+- CSS3
+- Tailwind CSS
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## Architecture & Development
+- Component-Based Architecture
+- State Management
+- Responsive Design
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Tools
+- Git
+- GitHub
+- Vercel
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+---
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+# Project Structure
 
-## Learn More
+```text
+ADOBilet-React/
+├── components/
+├── pages/
+├── redux/
+├── services/
+├── assets/
+├── styles/
+└── App.js
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+---
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+# Main Features
 
-### Code Splitting
+The platform includes several core functionalities:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+- Event browsing
+- Category filtering
+- Responsive event cards
+- Ticket interaction flow
+- Admin-focused management pages
+- Navigation and routing structure
+- State-based UI updates
 
-### Analyzing the Bundle Size
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+# Architecture
 
-### Making a Progressive Web App
+The project follows a modular React architecture.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+- Components are separated into reusable UI structures
+- Redux is used for state management
+- Routing is handled through React application structure
+- Tailwind CSS is used for responsive UI styling
+- Services manage frontend data interactions
 
-### Advanced Configuration
+This structure improves scalability and maintainability.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+---
 
-### Deployment
+# Live Demo
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+- Live Website: https://ado-bilet-react.vercel.app/
 
-### `npm run build` fails to minify
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+# Installation
+
+## 1. Clone the Repository
+
+```bash
+git clone https://github.com/anilates97/ADOBilet-React.git
+```
+
+---
+
+## 2. Navigate to the Project Folder
+
+```bash
+cd ADOBilet-React
+```
+
+---
+
+## 3. Install Dependencies
+
+```bash
+npm install
+```
+
+---
+
+## 4. Start the Development Server
+
+```bash
+npm start
+```
+
+---
+
+# Future Improvements
+
+- Authentication system
+- Payment integration
+- Ticket QR system
+- Event analytics dashboard
+- Backend API integration improvements
+- Role-based admin authorization
+- Improved mobile experience
+
+---
+
+# Developer
+
+Anıl Hasan Ateş
+
+- LinkedIn: https://linkedin.com/in/anilates97
+- GitHub: https://github.com/anilates97
+- Portfolio: https://anilates.vercel.app/
