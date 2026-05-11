@@ -3,7 +3,6 @@ import SliderComp from "../components/slidercomp/SliderComp";
 import DetailsComp from "../components/DetailsComp/DetailsComp";
 import { useLocation, useParams } from "react-router-dom";
 import HeaderMenu from "../components/Header/HeaderMenu";
-import HeaderTitle from "../components/Header/HeaderTitle";
 import Footer from "../components/FooterComp/Footer";
 
 const Details = () => {
@@ -16,11 +15,15 @@ const Details = () => {
     <>
       <div className="bg-color-primary">
         <HeaderMenu />
-        <HeaderTitle />
       </div>
 
-      <div className="text-[52px] text-white bg-gradient-to-b from-[#173633] to-[#07a696] rounded-b-full shadow-xl py-12 mb-6">
-          {path ? "PAST EVENT DETAILS" : "EVENT DETAILS"}
+      <div className="premium-page-title">
+        <div className="section-eyebrow">Location-aware booking</div>
+        <h1>{path ? "Past Event Details" : "Event Details"}</h1>
+        <p>
+          Review the lineup, schedule, venue location and booking options in one
+          polished event profile.
+        </p>
       </div>
       <DetailsComp id={id} path={path} />
       <SliderComp />

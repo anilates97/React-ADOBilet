@@ -7,8 +7,13 @@ import {
 import { useCallback, useEffect, useRef, useState } from "react";
 
 const containerStyle = {
-  width: "400px",
-  height: "340px",
+  width: "100%",
+  height: "100%",
+};
+
+const defaultCenter = {
+  lat: 41.0082,
+  lng: 28.9784,
 };
 
 function MapsComp({ location }) {
@@ -17,49 +22,40 @@ function MapsComp({ location }) {
   const showInfoWindow = () => {
     setInfoWindowOpen(true);
   };
-  const [mapLocation, setMapLocation] = useState("");
   const [address, setAddress] = useState("");
-  console.log("location", location);
   const { isLoaded, loadError } = useLoadScript({
     id: "google-map-script",
     googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_KEY,
   });
 
   const [center, setCenter] = useState(null);
-  const [google, setGoogle] = useState(null);
   const mapRef = useRef();
 
   useEffect(() => {
-    if (window.google) {
-      setGoogle(window.google);
-      setMapLocation(location);
+    if (!isLoaded || !window.google || !location) {
+      return;
     }
-  }, [location]);
 
-  useEffect(() => {
-    if (isLoaded && google) {
-      const geocoder = new google.maps.Geocoder();
-      if (location) {
-        geocoder.geocode({ address: mapLocation }, (results, status) => {
-          if (status === "OK") {
-            const place = results[0].geometry.location;
-            const addressText = results[0].formatted_address;
-            setAddress(addressText);
+    const geocoder = new window.google.maps.Geocoder();
 
-            setCenter({
-              lat: place.lat(),
-              lng: place.lng(),
-            });
-          } else {
-            console.error(
-              "Geocode was not successful for the following reason: ",
-              status
-            );
-          }
+    geocoder.geocode({ address: location }, (results, status) => {
+      if (status === "OK" && results[0]) {
+        const place = results[0].geometry.location;
+        const addressText = results[0].formatted_address;
+        setAddress(addressText);
+
+        setCenter({
+          lat: place.lat(),
+          lng: place.lng(),
         });
+      } else {
+        console.error(
+          "Geocode was not successful for the following reason: ",
+          status
+        );
       }
-    }
-  }, [isLoaded, google, location, mapLocation]);
+    });
+  }, [isLoaded, location]);
 
   const onLoad = useCallback((map) => {
     mapRef.current = map;
@@ -70,30 +66,44 @@ function MapsComp({ location }) {
   }
 
   return isLoaded ? (
-    <GoogleMap
-      mapContainerStyle={containerStyle}
-      center={center}
-      onLoad={onLoad}
-      zoom={16}
-    >
-      {center && (
-        <Marker
-          title="Marker Name"
-          position={center}
-          icon={{
-            url: "https://maps.google.com/mapfiles/ms/icons/red-dot.png",
-            scaledSize: new google.maps.Size(40, 40),
-          }}
-          onClick={showInfoWindow}
-        >
-          {infoWindowOpen && (
-            <InfoWindow onCloseClick={() => setInfoWindowOpen(false)}>
-              <h1>{address}</h1>
-            </InfoWindow>
-          )}
-        </Marker>
-      )}
-    </GoogleMap>
+    <div className="h-[360px] min-h-[320px] overflow-hidden rounded-[8px] border border-white/10">
+      <GoogleMap
+        mapContainerStyle={containerStyle}
+        center={center || defaultCenter}
+        onLoad={onLoad}
+        zoom={16}
+        options={{
+          disableDefaultUI: false,
+          clickableIcons: false,
+          styles: [
+            { elementType: "geometry", stylers: [{ color: "#151922" }] },
+            { elementType: "labels.text.fill", stylers: [{ color: "#d7c7a7" }] },
+            { elementType: "labels.text.stroke", stylers: [{ color: "#111722" }] },
+            { featureType: "water", elementType: "geometry", stylers: [{ color: "#0d2d33" }] },
+            { featureType: "road", elementType: "geometry", stylers: [{ color: "#263142" }] },
+            { featureType: "poi", elementType: "geometry", stylers: [{ color: "#1b2630" }] },
+          ],
+        }}
+      >
+        {center && (
+          <Marker
+            title="Event location"
+            position={center}
+            icon={{
+              url: "https://maps.google.com/mapfiles/ms/icons/red-dot.png",
+              scaledSize: new window.google.maps.Size(40, 40),
+            }}
+            onClick={showInfoWindow}
+          >
+            {infoWindowOpen && (
+              <InfoWindow onCloseClick={() => setInfoWindowOpen(false)}>
+                <div style={{ color: "#111722", fontWeight: 700 }}>{address}</div>
+              </InfoWindow>
+            )}
+          </Marker>
+        )}
+      </GoogleMap>
+    </div>
   ) : (
     <></>
   );

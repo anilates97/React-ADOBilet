@@ -1,4 +1,3 @@
-// SignIn.js
 import React from "react";
 import { useFormik } from "formik";
 import Input from "./Input";
@@ -28,47 +27,39 @@ function SignIn({ toggleForm }) {
       setTimeout(() => {
         window.location.href = "/";
       }, 400);
-      // TODO: BACKEND
-      console.log("Form values:", values);
     },
   });
 
   return (
-    <div className="fixed top-0 left-0 w-full h-full">
-      <div className="grid md:grid md:grid-cols-2  h-screen w-full">
-        <div className="bg-gray-800 flex flex-col pt-[120px]">
-          <form
-            onSubmit={formik.handleSubmit}
-            className="max-w-[400px] w-full mx-auto bg-gray-900 p-8 px-8 rounded-lg"
-          >
-            <h2 className="text-4xl dark:text-white font-bold text-center">
-              SIGN IN
-            </h2>
-            <Input label="Email" type="text" name="email" formik={formik} />
-            <Input
-              label="Password"
-              type="password"
-              name="password"
-              formik={formik}
-            />
-            <button
-              type="submit"
-              className="w-full my-5 py-2 bg-teal-600 shadow-lg shadow-teal-600/50 hover:shadow-teal-500/30 text-white rounded-lg"
-            >
-              Sign In
-            </button>
+    <form onSubmit={formik.handleSubmit} className="text-left">
+      <div className="section-eyebrow">Welcome back</div>
+      <h2 className="mt-3 text-5xl font-bold leading-none text-[#f7efe2]">
+        Sign in
+      </h2>
+      <p className="mt-4 text-sm leading-7 text-[#9da8b7]">
+        Continue to booking, admin tools and saved event actions.
+      </p>
 
-            <p className="text-white">
-              If you don't have an account yet, please{" "}
-              <span className="font-bold cursor-pointer" onClick={toggleForm}>
-                Sign Up
-              </span>
-              !
-            </p>
-          </form>
-        </div>
+      <div className="mt-7 grid gap-4">
+        <Input label="Email" type="text" name="email" formik={formik} />
+        <Input label="Password" type="password" name="password" formik={formik} />
       </div>
-    </div>
+
+      <button type="submit" className="premium-btn mt-7 w-full px-6">
+        Sign In
+      </button>
+
+      <p className="mt-6 text-center text-sm text-[#c7ced8]">
+        Don't have an account?{" "}
+        <button
+          type="button"
+          className="font-extrabold text-[#f2d59a] hover:text-white"
+          onClick={toggleForm}
+        >
+          Sign Up
+        </button>
+      </p>
+    </form>
   );
 }
 

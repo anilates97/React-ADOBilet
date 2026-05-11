@@ -67,6 +67,7 @@ import {
 } from "../backend/admin/AssignTicket/assignTicket";
 
 const initialState = {
+  eventsWithArtistsStatus: "idle",
   categories: [],
   categoriesTest: [],
   artists: [],
@@ -509,8 +510,15 @@ const dataSlice = createSlice({
       .addCase(getArtistTest.fulfilled, (state, action) => {
         state.artists = action.payload;
       })
+      .addCase(getArtistWithEvents.pending, (state) => {
+        state.eventsWithArtistsStatus = "loading";
+      })
       .addCase(getArtistWithEvents.fulfilled, (state, action) => {
-        state.eventsWithArtists = action.payload;
+        state.eventsWithArtists = action.payload || [];
+        state.eventsWithArtistsStatus = "succeeded";
+      })
+      .addCase(getArtistWithEvents.rejected, (state) => {
+        state.eventsWithArtistsStatus = "failed";
       })
       .addCase(getEventSingle.fulfilled, (state, action) => {
         state.event = action.payload;
@@ -519,10 +527,10 @@ const dataSlice = createSlice({
         state.eventPhotos = action.payload;
       })
       .addCase(getSeatsByEvent.fulfilled, (state, action) => {
-        state.seats = action.payload;
+        state.seats = action.payload || [];
       })
       .addCase(getTickets.fulfilled, (state, action) => {
-        state.eventTickets = action.payload;
+        state.eventTickets = action.payload || [];
       })
       .addCase(buyTicketOfEvent.fulfilled, (state, action) => {
         console.log("addcase", action.payload);
@@ -548,7 +556,7 @@ const dataSlice = createSlice({
         );
       })
       .addCase(selectSeatByUser.fulfilled, (state, action) => {
-        state.selectedSeat = action.payload;
+        state.selectedSeat = action.payload || {};
       })
       .addCase(getSoldTicketsData.fulfilled, (state, action) => {
         state.soldTickets = action.payload;

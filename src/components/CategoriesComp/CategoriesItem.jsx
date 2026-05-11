@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 
-function CategoriesItem({ category,handleScrollToTop }) {
+function CategoriesItem({ category, handleScrollToTop }) {
   const navigate = useNavigate();
   const goToEvents = () => {
     navigate(
@@ -14,15 +14,15 @@ function CategoriesItem({ category,handleScrollToTop }) {
         goToEvents();
         handleScrollToTop();
       }}
-      className="w-11/12 h-60 relative flex justify-center items-center cursor-pointer group"
+      className="premium-card group relative flex h-72 cursor-pointer items-end overflow-hidden p-5 text-left"
     >
       <img
         src={category.image}
-        alt="img"
-        className="absolute h-full w-full object-cover inset-0"
+        alt={category.name}
+        className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105"
       />
-      <div className="absolute inset-0 bg-color-rose-ebony bg-opacity-70 group-hover:bg-opacity-30 transition-all duration-[600ms]"></div>
-      <p className="absolute group-hover:scale-125 transition-all duration-[600ms] group-hover:font-bold tracking-widest">
+      <div className="absolute inset-0 bg-gradient-to-t from-[#07090d] via-[#07090d]/45 to-transparent transition duration-500 group-hover:via-[#07090d]/20"></div>
+      <p className="relative text-4xl font-bold uppercase leading-none tracking-normal text-[#f7efe2] transition duration-500 group-hover:text-[#f2d59a]">
         {category.name}
       </p>
     </div>

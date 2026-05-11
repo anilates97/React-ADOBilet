@@ -1,175 +1,95 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { IoIosHome } from "react-icons/io";
 import { SiEventstore } from "react-icons/si";
 import { GiRomanToga } from "react-icons/gi";
-import { MdEventSeat } from "react-icons/md";
-import { FaUsersLine } from "react-icons/fa6";
+import { MdEventSeat, MdAddAPhoto } from "react-icons/md";
+import { FaUsersLine, FaTicket } from "react-icons/fa6";
 import { BiSolidCategory } from "react-icons/bi";
-import { MdAddAPhoto } from "react-icons/md";
-import { FaTicket } from "react-icons/fa6";
 import { useState } from "react";
+import Dashboard from "./Dashboard";
+
+const navItems = [
+  ["Dashboard", "/admin/Dashboard", IoIosHome],
+  ["Events", "/admin/Events", SiEventstore],
+  ["Artists", "/admin/Artists", GiRomanToga],
+  ["Seats", "/admin/Seats", MdEventSeat],
+  ["Users", "/admin/Users", FaUsersLine],
+  ["Categories", "/admin/Categories", BiSolidCategory],
+  ["EventPhotos", "/admin/EventPhotos", MdAddAPhoto],
+  ["TicketCategories", "/admin/TicketCategories", FaTicket],
+];
 
 function AdminLayout({ children }) {
-  const [activeMenu, setActiveMenu] = useState("Dashboard");
   const [open, setOpen] = useState(true);
+  const location = useLocation();
+
+  const activeItem =
+    navItems.find(([, path]) =>
+      location.pathname.toLowerCase().startsWith(path.toLowerCase())
+    ) || navItems[0];
+  const activeMenu = activeItem[0];
 
   const toggleMenu = () => {
     setOpen(!open);
   };
 
-  const handleMenuClick = (menuName) => {
-    setActiveMenu(menuName);
-  };
   return (
-    <div className=" text-white h-screen flex relative">
-      <div
+    <div className="admin-shell flex min-h-screen bg-[#07090d] text-[#f7efe2]">
+      <button
         onClick={toggleMenu}
-        className="text-3xl absolute left-8 top-5 cursor-pointer xl:hidden z-[9999] h-12 bg-gray-800 p-4 rounded flex justify-center items-center"
+        className="fixed left-5 top-5 z-[9999] flex h-12 w-12 items-center justify-center border border-white/10 bg-[#111722] text-3xl xl:hidden"
       >
         <ion-icon
           name={open ? "menu" : "close"}
           style={{ color: "white" }}
         ></ion-icon>
-      </div>
-      <div
-        className={`sm:flex-[0.25] absolute xl:top-0 xl:left-0 ${
-          open ? "left-[-500px]" : "left-0"
-        }  xl:relative bg-gray-800 h-full transition-all duration-500 `}
+      </button>
+
+      <aside
+        className={`fixed bottom-0 top-0 z-[9998] w-[310px] border-r border-white/10 bg-[#0b1017]/95 p-5 backdrop-blur-xl transition-all duration-500 xl:sticky xl:left-0 ${
+          open ? "left-[-330px]" : "left-0"
+        } xl:left-0`}
       >
-        <div className="mt-6 text-2xl">ADMIN PANEL</div>
-        <ul className="m-10">
-          <li
-            className={`m-6 text-lg ${
-              activeMenu === "Dashboard"
-                ? "bg-green-700 text-white"
-                : "bg-white"
-            }  text-gray-700 p-3 rounded-lg font-bold  w-64 hover:w-full   duration-200 hover:overflow-hidden ease-in `}
-            onClick={() => handleMenuClick("Dashboard")}
-          >
-            <Link
-              to="/admin/Dashboard"
-              className="flex justify-center items-center  gap-3"
-            >
-              <IoIosHome />
-              <span className="w-14 transition-all ">Dashboard</span>
-            </Link>
-          </li>
+        <div className="mb-8 border-b border-white/10 pb-6">
+          <div className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#d9a85f]">
+            Operator console
+          </div>
+          <h1 className="mt-2 text-4xl font-bold leading-none">Admin Panel</h1>
+          <p className="mt-3 text-sm leading-6 text-[#9da8b7]">
+            Manage events, seats, artists, tickets and customer records.
+          </p>
+        </div>
 
-          <li
-            className={`m-6 text-lg ${
-              activeMenu === "Events" ? "bg-green-700 text-white" : "bg-white"
-            }  text-gray-700 p-3 rounded-lg font-bold w-64 hover:w-full   duration-200 hover:overflow-hidden ease-in `}
-            onClick={() => handleMenuClick("Events")}
-          >
+        <nav className="grid gap-2">
+          {navItems.map(([name, path, Icon]) => (
             <Link
-              to="/admin/Events"
-              className="flex justify-center items-center gap-3 "
+              key={name}
+              to={path}
+              onClick={() => setOpen(true)}
+              className={`flex items-center gap-3 border px-4 py-3 text-sm font-extrabold uppercase tracking-[0.1em] transition ${
+                activeMenu === name
+                  ? "border-[#d9a85f]/60 bg-[#d9a85f]/14 text-[#f2d59a]"
+                  : "border-white/10 bg-white/[0.03] text-[#d7dee8] hover:border-[#26d0b1]/50 hover:text-white"
+              }`}
             >
-              <SiEventstore />
-              <span className="w-14"> Events</span>
+              <Icon />
+              <span>{name === "TicketCategories" ? "Tickets" : name}</span>
             </Link>
-          </li>
+          ))}
+        </nav>
+      </aside>
 
-          <li
-            className={`m-6 text-lg ${
-              activeMenu === "Artists" ? "bg-green-700 text-white" : "bg-white"
-            }  text-gray-700 p-3 rounded-lg font-bold w-64 hover:w-full   duration-200 hover:overflow-hidden ease-in `}
-            onClick={() => handleMenuClick("Artists")}
-          >
-            <Link
-              to="/admin/Artists"
-              className=" flex justify-center items-center gap-3 "
-            >
-              <GiRomanToga />
-              <span className="w-14"> Artists</span>
-            </Link>
-          </li>
-
-          <li
-            className={`m-6 text-lg ${
-              activeMenu === "Seats" ? "bg-green-700 text-white" : "bg-white"
-            }  text-gray-700 p-3 rounded-lg font-bold w-64 hover:w-full   duration-200 hover:overflow-hidden ease-in `}
-            onClick={() => handleMenuClick("Seats")}
-          >
-            <Link
-              to="/admin/Seats"
-              className="flex justify-center items-center gap-3 "
-            >
-              <MdEventSeat />
-              <span className="w-14"> Seats</span>
-            </Link>
-          </li>
-
-          <li
-            className={`m-6 text-lg ${
-              activeMenu === "Users" ? "bg-green-700 text-white" : "bg-white"
-            }  text-gray-700 p-3 rounded-lg font-bold w-64 hover:w-full   duration-200 hover:overflow-hidden ease-in `}
-            onClick={() => handleMenuClick("Users")}
-          >
-            <Link
-              to="/admin/Users"
-              className="flex justify-center items-center gap-3 "
-            >
-              <FaUsersLine />
-              <span className="w-14"> Users</span>
-            </Link>
-          </li>
-
-          <li
-            className={`m-6 text-lg ${
-              activeMenu === "Categories"
-                ? "bg-green-700 text-white"
-                : "bg-white"
-            }  text-gray-700 p-3 rounded-lg font-bold w-64 hover:w-full   duration-200 hover:overflow-hidden ease-in `}
-            onClick={() => handleMenuClick("Categories")}
-          >
-            <Link
-              to="/admin/Categories"
-              className="flex justify-center items-center gap-3 "
-            >
-              <BiSolidCategory />
-              <span className="w-14"> Categories</span>
-            </Link>
-          </li>
-
-          <li
-            className={`m-6 text-lg ${
-              activeMenu === "EventPhotos"
-                ? "bg-green-700 text-white"
-                : "bg-white"
-            }  text-gray-700 p-3 rounded-lg font-bold w-64 hover:w-full   duration-200 hover:overflow-hidden ease-in `}
-            onClick={() => handleMenuClick("EventPhotos")}
-          >
-            <Link
-              to="/admin/EventPhotos"
-              className="flex justify-center items-center gap-3 "
-            >
-              <MdAddAPhoto />
-              <span className="w-14"> Photo</span>
-            </Link>
-          </li>
-
-          <li
-            className={`m-6 text-lg ${
-              activeMenu === "TicketCategories"
-                ? "bg-green-700 text-white"
-                : "bg-white"
-            }  text-gray-700 p-3 rounded-lg font-bold w-64 hover:w-full   duration-200 hover:overflow-hidden ease-in `}
-            onClick={() => handleMenuClick("TicketCategories")}
-          >
-            <Link
-              to="/admin/TicketCategories"
-              className="flex justify-center items-center gap-3 "
-            >
-              <FaTicket />
-              <span className="w-14"> Ticket</span>
-            </Link>
-          </li>
-        </ul>
-      </div>
-      <div className="text-2xl bg-gray-700 flex-[1] text-[16px] xl:flex-[0.75] min-w-[75%]">
-        {children}
-      </div>
+      <main className="min-w-0 flex-1 overflow-auto bg-[radial-gradient(circle_at_top_right,rgba(38,208,177,0.12),transparent_32rem)] p-5 pt-20 xl:p-8">
+        <div className="mb-7 text-left">
+          <div className="section-eyebrow">ADO Bilet management</div>
+          <h2 className="mt-2 text-5xl font-bold text-[#f7efe2]">
+            {activeMenu}
+          </h2>
+        </div>
+        <div className="glass-panel min-h-[calc(100vh-180px)] overflow-auto p-4 sm:p-5">
+          {children || <Dashboard />}
+        </div>
+      </main>
     </div>
   );
 }

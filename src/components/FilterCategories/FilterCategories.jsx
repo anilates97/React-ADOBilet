@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const FilterCategories = ({ events, onSelectCategory, clickedCategory }) => {
   const [selectedCategory, setSelectedCategory] = useState("");
@@ -30,28 +30,33 @@ const FilterCategories = ({ events, onSelectCategory, clickedCategory }) => {
   };
 
   return (
-    <div className="mt-4">
-      <label className="text-xl font-bold me-2">Select a Category:</label>
-      <select
-        onChange={handleCategorySelect}
-        value={
-          clickedCategory !== null && isSelected === false
-            ? clickedCategory
-            : selectedCategory === ""
-            ? "All"
-            : selectedCategory
-        }
-        className="px-4 py-2 border rounded-lg w-[200px]"
-      >
-        <option value="All">All</option>
-        {Array.from(new Set(events.map((event) => event.category.name))).map(
-          (category, index) => (
-            <option className="capitalize" key={index} value={category}>
-              {category}
-            </option>
-          )
-        )}
-      </select>
+    <div className="filter-shell">
+      <div className="filter-toolbar">
+        <div>
+          <label className="section-eyebrow">Category</label>
+          <p>Refine the calendar by experience type.</p>
+        </div>
+        <select
+          onChange={handleCategorySelect}
+          value={
+            clickedCategory !== null && isSelected === false
+              ? clickedCategory
+              : selectedCategory === ""
+              ? "All"
+              : selectedCategory
+          }
+          className="premium-input w-full px-4 sm:max-w-[280px]"
+        >
+          <option value="All">All</option>
+          {Array.from(new Set(events.map((event) => event.category.name))).map(
+            (category, index) => (
+              <option className="capitalize" key={index} value={category}>
+                {category}
+              </option>
+            )
+          )}
+        </select>
+      </div>
     </div>
   );
 };

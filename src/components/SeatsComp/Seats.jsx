@@ -1,66 +1,40 @@
-function Seats({ seat, onSelect, showImage, onBuyTicket }) {
-  // useEffect(() => {
-  //   dispatch(getSeatsByEvent(seat.eventId));
-  // }, [dispatch, seat.eventId]);
+function Seats({ seat, onSelect }) {
+  const category = seat.ticketPricing?.ticketCategories?.categoryName;
+  const isSold = seat.status === "SOLD";
 
   function handleSelectSeat(seatId) {
-    onSelect(seatId);
-
-    showImage(seat.eventId);
-  }
-
-  function getBackgroundColor(category) {
-    switch (category) {
-      case "VIP":
-        return "bg-red-600";
-      case "Normal":
-        return "bg-orange-600";
-      case "Öğrenci":
-        return "bg-green-400";
-      default:
-        return "bg-blue-400";
+    if (!isSold) {
+      onSelect(seatId);
     }
   }
 
-  function getHoverColor(category) {
+  function getSeatClasses() {
+    if (isSold) {
+      return "border-white/10 bg-white/[0.04] text-[#677284] opacity-60";
+    }
+
     switch (category) {
       case "VIP":
-        return "hover:bg-red-400";
+        return "border-red-400/50 bg-red-500/20 text-red-100 hover:bg-red-500/30";
       case "Normal":
-        return "hover:bg-orange-800";
+        return "border-orange-400/50 bg-orange-500/20 text-orange-100 hover:bg-orange-500/30";
+      case "Ogrenci":
       case "Öğrenci":
-        return "hover:bg-green-600";
+      case "Ã–ÄŸrenci":
+        return "border-emerald-400/50 bg-emerald-500/20 text-emerald-100 hover:bg-emerald-500/30";
       default:
-        return "hover:bg-blue-600";
+        return "border-blue-400/50 bg-blue-500/20 text-blue-100 hover:bg-blue-500/30";
     }
   }
 
   return (
     <button
-      disabled={seat.status === "SOLD"}
-      className="h-20"
+      disabled={isSold}
+      className={`h-16 border text-sm font-extrabold transition ${getSeatClasses()}`}
       onClick={() => handleSelectSeat(seat.id)}
+      title={isSold ? "Sold" : category || "Seat"}
     >
-      <div
-        className={`${!seat.availability && "bg-gray-600"} ${
-          seat.ticketPricing &&
-          getBackgroundColor(seat.ticketPricing.ticketCategories.categoryName)
-        } ${
-          seat.ticketPricing &&
-          getBackgroundColor(seat.ticketPricing.ticketCategories.categoryName)
-        } ${
-          seat.ticketPricing &&
-          getBackgroundColor(seat.ticketPricing.ticketCategories.categoryName)
-        } p-4 m-5 rounded-md text-white ${
-          seat.availability &&
-          seat.ticketPricing &&
-          `${getHoverColor(
-            seat.ticketPricing.ticketCategories.categoryName
-          )} transition-all duration-200`
-        } w-16`}
-      >
-        {seat.seatName}
-      </div>
+      {seat.seatName}
     </button>
   );
 }

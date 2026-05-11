@@ -4,13 +4,13 @@ import FilterCategories from "../components/FilterCategories/FilterCategories";
 import { useDispatch, useSelector } from "react-redux";
 import { getArtistWithEvents } from "../redux/dataSlice";
 import { useParams } from "react-router-dom";
-import HeaderTitle from "../components/Header/HeaderTitle";
 import HeaderMenu from "../components/Header/HeaderMenu";
 import Footer from "../components/FooterComp/Footer";
-import { HashLoader } from "react-spinners";
 
 const Events = () => {
-  const { eventsWithArtists } = useSelector((state) => state.data);
+  const { eventsWithArtists, eventsWithArtistsStatus } = useSelector(
+    (state) => state.data
+  );
 
   const { categoryName } = useParams();
   const [filteredEvents, setFilteredEvents] = useState([]);
@@ -59,13 +59,25 @@ const Events = () => {
     return filtered;
   });
 
-  console.log("data", checkedData.length);
-
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(getArtistWithEvents());
-  }, [dispatch]);
+    if (eventsWithArtistsStatus === "idle") {
+      dispatch(getArtistWithEvents());
+    }
+  }, [dispatch, eventsWithArtistsStatus]);
+
+  useEffect(() => {
+    if (eventsWithArtists.length > 0) {
+      if (!categoryName || categoryName === "All") {
+        setFilteredEvents(eventsWithArtists);
+      } else {
+        setFilteredEvents(
+          eventsWithArtists.filter((event) => event.category.name === categoryName)
+        );
+      }
+    }
+  }, [eventsWithArtists, categoryName]);
 
   const handleCategorySelect = (category) => {
     if (category === "") {
@@ -78,16 +90,40 @@ const Events = () => {
     }
   };
 
+  const renderSkeletonCards = () => (
+    <div className="mx-auto grid max-w-7xl grid-cols-1 justify-items-center gap-7 px-5 py-10 md:grid-cols-2 xl:grid-cols-3">
+      {[1, 2, 3].map((item) => (
+        <div
+          key={item}
+          className="premium-card h-[560px] w-full max-w-[410px] animate-pulse"
+        >
+          <div className="h-64 bg-white/[0.06]"></div>
+          <div className="space-y-4 p-5">
+            <div className="h-8 w-4/5 bg-white/[0.08]"></div>
+            <div className="h-4 w-full bg-white/[0.06]"></div>
+            <div className="h-4 w-2/3 bg-white/[0.06]"></div>
+            <div className="h-12 w-full bg-white/[0.08]"></div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
   return (
     <>
       <div className="bg-color-primary">
         <HeaderMenu />
-        <HeaderTitle />
       </div>
-      {eventsWithArtists?.length > 0 ? (
-        <>
-          <div className="text-[52px] text-white bg-gradient-to-b from-[#173633] to-[#07a696] rounded-b-full shadow-xl py-12 mb-6">
-            INCOMING EVENTS
+      <main className="public-page-main">
+        {eventsWithArtists?.length > 0 ? (
+          <>
+          <div className="premium-page-title">
+            <div className="section-eyebrow">Browse the calendar</div>
+            <h1>Incoming Events</h1>
+            <p>
+              Filter live experiences by category and discover event pages with
+              rich visuals, booking actions and venue maps.
+            </p>
           </div>
           <FilterCategories
             events={eventsWithArtists}
@@ -97,16 +133,30 @@ const Events = () => {
           {checkedData.length > 0 ? (
             <EventsComp events={filteredEvents} categoryName={categoryName} />
           ) : (
-            <div className="text-2xl p-6">There is no incoming events!</div>
+            <section className="premium-section !pt-8">
+              <div className="empty-state-panel">
+                <div className="section-eyebrow">Calendar clear</div>
+                <h2>There are no incoming events yet</h2>
+                <p>
+                  New live experiences will appear here as soon as they are
+                  added to the catalogue.
+                </p>
+              </div>
+            </section>
           )}
-        </>
-      ) : eventsWithArtists?.length === 0 ? (
-        <div className="flex justify-center p-8">
-          <HashLoader size={100} color="#404529" />
-        </div>
-      ) : (
-        <div className="p-10 mb-1 text-lg">There are no incoming events.</div>
-      )}
+          </>
+        ) : eventsWithArtistsStatus === "loading" ? (
+          renderSkeletonCards()
+        ) : (
+          <section className="premium-section">
+            <div className="empty-state-panel">
+              <div className="section-eyebrow">Calendar clear</div>
+              <h2>There are no incoming events</h2>
+              <p>The event catalogue is ready for the next announcement.</p>
+            </div>
+          </section>
+        )}
+      </main>
       <Footer />
     </>
   );

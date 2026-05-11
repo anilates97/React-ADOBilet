@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import SliderCard from "./SliderCard";
 import bg from "../../assets/bg.png";
 import { useDispatch, useSelector } from "react-redux";
@@ -8,28 +8,37 @@ import "swiper/css";
 import "swiper/css/pagination";
 import { Pagination } from "swiper/modules";
 
-import { HashLoader } from "react-spinners";
-
 const SliderComp = () => {
-  const { eventsWithArtists } = useSelector((state) => state.data);
-
+  const { eventsWithArtists, eventsWithArtistsStatus } = useSelector(
+    (state) => state.data
+  );
   const dispatch = useDispatch();
+
   useEffect(() => {
-    dispatch(getArtistWithEvents());
-  }, [dispatch]);
+    if (eventsWithArtistsStatus === "idle") {
+      dispatch(getArtistWithEvents());
+    }
+  }, [dispatch, eventsWithArtistsStatus]);
 
   const width = window.innerWidth;
 
   return (
-    <div className="relative h-full w-full mb-2 ">
-      <h2 className="text-[52px] text-white bg-gradient-to-b from-[#173633] to-[#07a696] rounded-b-full shadow-xl py-12 mb-6 z-40 relative">
-        Yaklaşan Popüler Etkinlikler
-      </h2>
+    <section className="premium-section">
+      <div className="mb-10 flex flex-col items-start justify-between gap-5 md:flex-row md:items-end">
+        <div className="text-left">
+          <div className="section-eyebrow">Featured now</div>
+          <h2 className="section-title mt-3">Popular upcoming events</h2>
+        </div>
+        <p className="section-copy max-w-md text-left">
+          Handpicked concerts, performances and cultural nights with rich event
+          detail pages and location-aware discovery.
+        </p>
+      </div>
 
       {eventsWithArtists?.length > 0 ? (
         <>
           <img
-            className="absolute top-0 left-0 h-full w-full"
+            className="absolute inset-0 -z-10 h-full w-full object-cover opacity-[0.04]"
             src={bg}
             alt=""
           />
@@ -42,21 +51,32 @@ const SliderComp = () => {
             modules={[Pagination]}
             className="mySwiper !py-[40px]"
           >
-            {eventsWithArtists.map((events, i) => {
-              return (
-                <SwiperSlide key={i}>
-                  <SliderCard events={events} key={i} />
-                </SwiperSlide>
-              );
-            })}
+            {eventsWithArtists.map((events, i) => (
+              <SwiperSlide key={i}>
+                <SliderCard events={events} />
+              </SwiperSlide>
+            ))}
           </Swiper>
         </>
       ) : (
-        <div className="flex justify-center">
-          <HashLoader size={120} color="#32847a" />
+        <div className="grid grid-cols-1 gap-5 py-10 md:grid-cols-2 lg:grid-cols-4">
+          {[1, 2, 3, 4].map((item) => (
+            <div
+              key={item}
+              className="premium-card h-[390px] animate-pulse bg-white/[0.04]"
+            >
+              <div className="h-64 bg-white/[0.06]"></div>
+              <div className="space-y-4 p-5">
+                <div className="h-4 w-1/2 bg-white/[0.08]"></div>
+                <div className="h-8 w-4/5 bg-white/[0.08]"></div>
+                <div className="h-4 w-full bg-white/[0.06]"></div>
+                <div className="h-4 w-2/3 bg-white/[0.06]"></div>
+              </div>
+            </div>
+          ))}
         </div>
       )}
-    </div>
+    </section>
   );
 };
 

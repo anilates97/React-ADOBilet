@@ -1,11 +1,17 @@
 import supabase from "../supabase";
-export async function getEventTickets() {
+export async function getEventTickets(eventId) {
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from("ticketPricing")
       .select(
         "id,ticketCategories(id,categoryName,price), events(id,eventName)"
       );
+
+    if (eventId) {
+      query = query.eq("eventId", eventId);
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       console.error(error);
@@ -15,6 +21,7 @@ export async function getEventTickets() {
     return data;
   } catch (e) {
     console.log(e);
+    throw e;
   }
 }
 
@@ -33,6 +40,7 @@ export async function getSoldTickets() {
     return data;
   } catch (e) {
     console.log(e);
+    throw e;
   }
 }
 
@@ -97,9 +105,9 @@ export async function buyTicket(eventId, seatId, ticketId) {
       throw new Error("Sold count could not be updated");
     }
 
-    return { success: true };
+    return { success: true, eventId, seatId, ticketId };
   } catch (error) {
     console.error(error);
-    throw new Error("An error occurred while buying the ticket");
+    throw error;
   }
 }

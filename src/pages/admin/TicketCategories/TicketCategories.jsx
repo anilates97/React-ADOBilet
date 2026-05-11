@@ -1,44 +1,36 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   deleteTicketCategoryById,
   getAllTicketCategories,
   getTicketCategoriesWithEventId,
   getTicketOfEventById,
-  getTickets,
 } from "../../../redux/dataSlice";
 import { useNavigate } from "react-router-dom";
-import { FaEdit } from "react-icons/fa";
-import { RiDeleteBin2Fill } from "react-icons/ri";
+import {
+  AdminActions,
+  AdminCard,
+  AdminSelect,
+  AdminTable,
+  AdminToolbar,
+} from "../AdminShared";
 
 function TicketCategories() {
   const dispatch = useDispatch();
   const [selectedEvent, setSelectedEvent] = useState("");
   const [selectedEventName, setSelectedEventName] = useState("");
-  const {
-    ticketCategories,
-    ticketCategoriesByEvent,
-
-    eventTicketsAdmin,
-  } = useSelector((state) => state.data);
+  const { eventTicketsAdmin, ticketCategories, ticketCategoriesByEvent } =
+    useSelector((state) => state.data);
   const navigate = useNavigate();
-
-  //const eventId = ticketCategories[0].events.id;
-
-  console.log("eventTicketsAdmin", eventTicketsAdmin);
 
   useEffect(() => {
     dispatch(getAllTicketCategories());
+  }, [dispatch]);
 
-    if (
-      ticketCategories &&
-      Object.keys(ticketCategories).length > 0 &&
-      ticketCategories !== undefined
-    ) {
-      if (selectedEvent) {
-        dispatch(getTicketCategoriesWithEventId(selectedEvent));
-        dispatch(getTicketOfEventById(selectedEvent));
-      }
+  useEffect(() => {
+    if (selectedEvent) {
+      dispatch(getTicketCategoriesWithEventId(selectedEvent));
+      dispatch(getTicketOfEventById(selectedEvent));
     }
   }, [dispatch, selectedEvent]);
 
@@ -46,35 +38,37 @@ function TicketCategories() {
     eventId: selectedEvent,
     eventName: selectedEventName,
   };
-  const uniqueEvents = [];
 
-  if (ticketCategories) {
-    ticketCategories.forEach((category) => {
+  const uniqueEvents = useMemo(() => {
+    const map = new Map();
+    ticketCategories?.forEach((category) => {
       const eventId = category.events?.id;
       const eventName = category.events?.eventName;
-
-      const foundEvent = uniqueEvents.find(
-        (event) => event.eventId === eventId
-      );
-
-      if (!foundEvent) {
-        uniqueEvents.push({ eventId, eventName });
-      }
+      if (eventId && eventName) map.set(eventId, eventName);
     });
-  }
 
-  // const uniqueEventNames = [
-  //   ...new Set(ticketCategories.map((item) => item.events.eventName)),
-  // ];
+    return Array.from(map, ([eventId, eventName]) => ({ eventId, eventName }));
+  }, [ticketCategories]);
 
   return (
-    <div className="flex h-full items-center  flex-col p-2 overflow-x-scroll min-w-[75%] ">
-      <h1 className="text-4xl mb-6 mt-32">TICKET CATEGORIES</h1>
-      <div className="w-full md:w-64 text-black rounded-lg p-3 mb-4 ">
-        <select
-          name=""
-          className="w-full md:w-64 rounded-lg p-4 border-4 outline-none"
-          id=""
+    <div className="grid gap-5">
+      <AdminToolbar
+        eyebrow="Ticket inventory"
+        title="Tickets"
+        copy="Configure category pricing and inspect generated tickets per event."
+        actionLabel={selectedEvent ? "Add category" : "Add new category"}
+        onAction={() =>
+          navigate("/admin/addTicketCategories", {
+            state: {
+              selectedEventObj,
+              isNew: !selectedEvent,
+            },
+          })
+        }
+      >
+        <AdminSelect
+          label="Event"
+          value={selectedEvent || "chooseOne"}
           onChange={(e) => {
             const selectedOption = e.target.options[e.target.selectedIndex];
             setSelectedEvent(
@@ -83,157 +77,78 @@ function TicketCategories() {
             setSelectedEventName(selectedOption.text);
           }}
         >
-          <option value="chooseOne">Choose Event</option>
+          <option value="chooseOne">Choose event</option>
           {uniqueEvents.map((event) => (
-            <option value={event.eventId}>{event.eventName}</option>
+            <option key={event.eventId} value={event.eventId}>
+              {event.eventName}
+            </option>
           ))}
-        </select>
-      </div>
+        </AdminSelect>
+      </AdminToolbar>
 
-      <div className="bg-white text-black rounded-lg p-1  mx-auto  ">
-        {selectedEvent ? (
-          <table className="min-w-[75%] mx-auto">
-            <thead className="bg-color-primary text-white">
-              <tr>
-                <th className="p-4">Name</th>
-                <th className="p-4">Price</th>
-                <th className="p-4"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {ticketCategoriesByEvent.map((ticketCategory, i) => (
-                <tr
-                  key={ticketCategory.id}
-                  className={`${i % 2 === 0 && "bg-gray-300"} `}
-                >
-                  <td className="p-4">{ticketCategory.categoryName}</td>
-                  <td>{ticketCategory.price}</td>
-                  <td className="w-[300px]">
-                    <div className="flex justify-evenly space-x-2">
-                      <button
-                        className="text-zinc-300 bg-red-800 p-2 rounded-lg text-[16px] hover:bg-opacity-75 transition-all duration-200 w-[150px] flex justify-center items-center space-x-2"
-                        onClick={() => {
-                          dispatch(deleteTicketCategoryById(ticketCategory.id));
-                        }}
-                      >
-                        <span> Delete</span>
-                        <RiDeleteBin2Fill />
-                      </button>
-                      <button
-                        className="text-zinc-300 bg-green-900 p-2 rounded-lg text-[16px] hover:bg-opacity-75 transition-all duration-200 w-[150px] flex justify-center items-center space-x-2"
-                        onClick={() => {
-                          navigate(
-                            `/admin/TicketCategories/${ticketCategory.id}`,
-                            {
-                              state: {
-                                ticketCategory,
-                                selectedEventObj,
-                              },
-                            }
-                          );
-                        }}
-                      >
-                        <span>Update</span>
-                        <FaEdit />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : (
-          <div>You didn't select event! </div>
-        )}
-      </div>
-
-      <div className="mb-12">
-        {!selectedEvent && (
-          <button
-            className="bg-color-primary p-2 rounded-lg hover:bg-opacity-30 transition-all duration-200 mt-2 w-64"
-            onClick={() => {
-              navigate("/admin/addTicketCategories", {
-                state: {
-                  selectedEventObj,
-                  isNew: true,
-                },
-              });
-            }}
-          >
-            Add New Ticket Category
-          </button>
-        )}
-      </div>
-
-      {selectedEvent && (
-        <div className="mb-12">
-          <button
-            className="bg-gray-800 p-4 rounded-lg hover:bg-opacity-75 transition-all duration-200 w-64"
-            onClick={() =>
-              navigate("/admin/addTicketCategories", {
-                state: {
-                  selectedEventObj,
-                },
-              })
-            }
-          >
-            Add Category
-          </button>
-        </div>
-      )}
-
-      {/* TICKETS */}
-
-      {(eventTicketsAdmin && selectedEvent === "") || (
+      {selectedEvent ? (
         <>
-          <h1 className="text-4xl mb-6">TICKETS</h1>
-          <div className="bg-white text-black rounded-lg p-1  mx-auto  ">
-            {Object.keys(eventTicketsAdmin).length > 0 ? (
-              <table
-                className="
-                min-w-[75%] mx-auto"
-              >
-                <thead className="bg-color-primary text-white">
-                  <tr>
-                    <th className="p-4">Id</th>
-                    <th className="p-4">Category Name</th>
-                    <th className="p-4">Price</th>
-                    <th className="p-4">isAssign</th>
-                    <th className="p-4">isSold</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {Object.keys(eventTicketsAdmin).length > 0 &&
-                    eventTicketsAdmin?.map((ticket, i) => (
-                      <tr
-                        key={ticket?.id}
-                        className={`${
-                          i % 2 === 0 ? "bg-gray-300" : "bg-white"
-                        } text-black`}
-                      >
-                        <td>{ticket?.id}</td>
-
-                        <td>{ticket?.ticketCategories.categoryName}</td>
-                        <td>{ticket?.ticketCategories.price}</td>
-                        <td>
-                          {ticket?.isAssign ? "ASSIGNED" : "NOT ASSIGNED"}
-                        </td>
-                        <td>{ticket?.isSold ? "SOLD" : "FREE"}</td>
-                      </tr>
-                    ))}
-                </tbody>
-              </table>
-            ) : (
-              <div> There are no tickets on this event. </div>
+          <AdminTable
+            columns={["Category", "Price", "Actions"]}
+            data={ticketCategoriesByEvent}
+            emptyMessage="No ticket categories found for this event."
+            getSearchText={(ticketCategory) =>
+              `${ticketCategory.categoryName} ${ticketCategory.price}`
+            }
+            renderCard={(ticketCategory) => (
+              <AdminCard
+                key={ticketCategory.id}
+                meta="Ticket category"
+                title={ticketCategory.categoryName}
+                fields={[["Price", ticketCategory.price]]}
+                actions={
+                  <AdminActions
+                    onDelete={() =>
+                      dispatch(deleteTicketCategoryById(ticketCategory.id))
+                    }
+                    onUpdate={() =>
+                      navigate(`/admin/TicketCategories/${ticketCategory.id}`, {
+                        state: {
+                          ticketCategory,
+                          selectedEventObj,
+                        },
+                      })
+                    }
+                  />
+                }
+              />
             )}
-          </div>
-        </>
-      )}
-      {selectedEvent && (
-        <div className="mt-4">
-          <button
-            className="bg-gray-800 p-2 rounded-lg hover:bg-opacity-75 transition-all duration-200 w-64"
-            onClick={() =>
+            renderRow={(ticketCategory) => (
+              <tr key={ticketCategory.id}>
+                <td className="font-bold text-[#f7efe2]">
+                  {ticketCategory.categoryName}
+                </td>
+                <td>{ticketCategory.price}</td>
+                <td>
+                  <AdminActions
+                    onDelete={() =>
+                      dispatch(deleteTicketCategoryById(ticketCategory.id))
+                    }
+                    onUpdate={() =>
+                      navigate(`/admin/TicketCategories/${ticketCategory.id}`, {
+                        state: {
+                          ticketCategory,
+                          selectedEventObj,
+                        },
+                      })
+                    }
+                  />
+                </td>
+              </tr>
+            )}
+          />
+
+          <AdminToolbar
+            eyebrow="Generated tickets"
+            title="Ticket pool"
+            copy="Tickets created from the selected pricing categories."
+            actionLabel="Add ticket"
+            onAction={() =>
               navigate("/admin/addTicketPrice", {
                 state: {
                   selectedEventObj,
@@ -241,9 +156,45 @@ function TicketCategories() {
                 },
               })
             }
-          >
-            Add Ticket
-          </button>
+          />
+
+          <AdminTable
+            columns={["Id", "Category", "Price", "Assign", "Sale"]}
+            data={eventTicketsAdmin}
+            emptyMessage="There are no tickets on this event."
+            getSearchText={(ticket) =>
+              `${ticket?.id} ${ticket?.ticketCategories?.categoryName} ${ticket?.ticketCategories?.price} ${ticket?.isAssign ? "assigned" : "not assigned"} ${ticket?.isSold ? "sold" : "free"}`
+            }
+            renderCard={(ticket) => (
+              <AdminCard
+                key={ticket?.id}
+                meta={ticket?.isSold ? "Sold" : "Free"}
+                title={ticket?.ticketCategories?.categoryName || `Ticket #${ticket?.id}`}
+                fields={[
+                  ["Id", ticket?.id],
+                  ["Price", ticket?.ticketCategories?.price],
+                  ["Assign", ticket?.isAssign ? "Assigned" : "Not assigned"],
+                  ["Sale", ticket?.isSold ? "Sold" : "Free"],
+                ]}
+              />
+            )}
+            renderRow={(ticket) => (
+              <tr key={ticket?.id}>
+                <td>{ticket?.id}</td>
+                <td className="font-bold text-[#f7efe2]">
+                  {ticket?.ticketCategories?.categoryName || "-"}
+                </td>
+                <td>{ticket?.ticketCategories?.price || "-"}</td>
+                <td>{ticket?.isAssign ? "Assigned" : "Not assigned"}</td>
+                <td>{ticket?.isSold ? "Sold" : "Free"}</td>
+              </tr>
+            )}
+          />
+        </>
+      ) : (
+        <div className="admin-empty-state">
+          <div className="admin-empty-orb">?</div>
+          <p>Select an event to manage ticket categories and ticket pool.</p>
         </div>
       )}
     </div>

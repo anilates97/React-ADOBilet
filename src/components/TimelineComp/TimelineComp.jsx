@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { AiFillCalendar } from "react-icons/ai";
 import TimelineElement from "./TimelineElement";
 import { useDispatch, useSelector } from "react-redux";
 import { getArtistWithEvents } from "../../redux/dataSlice";
-import { HashLoader } from "react-spinners";
 import { Link } from "react-router-dom";
 
 const TimelineComp = () => {
@@ -13,11 +12,15 @@ const TimelineComp = () => {
   const year = date.getFullYear();
   const currentDate = `${day}.${month}.${year}`;
 
-  const { eventsWithArtists } = useSelector((state) => state.data);
+  const { eventsWithArtists, eventsWithArtistsStatus } = useSelector(
+    (state) => state.data
+  );
   const dispatch = useDispatch();
   useEffect(() => {
-    dispatch(getArtistWithEvents());
-  }, [dispatch]);
+    if (eventsWithArtistsStatus === "idle") {
+      dispatch(getArtistWithEvents());
+    }
+  }, [dispatch, eventsWithArtistsStatus]);
 
   const todayEvents =
     eventsWithArtists?.length > 0
@@ -51,9 +54,7 @@ const TimelineComp = () => {
                 There are no events today.
               </span>
             </div>
-          ) : (
-            <HashLoader size={50} color="#32847a" />
-          )}
+          ) : null}
         </div>
       </div>
     </div>

@@ -12,7 +12,8 @@ module.exports = {
         "color-myrtle-green": "#3D726D",
       },
       fontFamily: {
-        sans: ["Cormorant Garamond", "sans-serif"],
+        sans: ["Manrope", "sans-serif"],
+        display: ["Cormorant Garamond", "serif"],
       },
     },
   },

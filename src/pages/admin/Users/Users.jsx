@@ -1,8 +1,13 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getUsers } from "../../../redux/dataSlice";
-
-import { HashLoader } from "react-spinners";
+import {
+  AdminCard,
+  AdminLoading,
+  AdminTable,
+  AdminToolbar,
+  TextClamp,
+} from "../AdminShared";
 
 function Users() {
   const dispatch = useDispatch();
@@ -13,38 +18,49 @@ function Users() {
   }, [dispatch]);
 
   return (
-    <div className="flex justify-center h-full items-center flex-col min-w-[75%] overflow-x-auto">
-      <div className="bg-white text-black rounded-lg p-1 overflow-y-auto mx-auto  min-w-[75%]">
-        {Object.keys(users).length > 0 ? (
-          <table className="w-[900px] flex flex-col  min-w-[75%] mx-auto">
-            <thead className="bg-color-primary text-white">
-              <tr>
-                <th className="p-4 w-[300px]">Username</th>
+    <div className="grid gap-5">
+      <AdminToolbar
+        eyebrow="Customer records"
+        title="Users"
+        copy="Review application profiles and role assignments."
+      />
 
-                <th className="p-4 w-[300px]">Email</th>
-                <th className="p-4 w-[300px]">Role</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.map((user, i) => (
-                <tr
-                  key={user.id}
-                  className={`${i % 2 === 0 && "bg-gray-300"} `}
-                >
-                  <td className="p-4 w-[300px]">{user.username}</td>
-
-                  <td className="p-4 w-[300px]">{user.email}</td>
-                  <td className="p-4 w-[300px]">{user.authenticated_role}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : (
-          <div className="flex justify-center p-8">
-            <HashLoader size={100} color="#404529" />
-          </div>
-        )}
-      </div>
+      {users ? (
+        <AdminTable
+          columns={["Username", "Email", "Role"]}
+          data={users}
+          emptyMessage="No users found."
+          getSearchText={(user) =>
+            `${user.username} ${user.email} ${user.authenticated_role}`
+          }
+          renderCard={(user) => (
+            <AdminCard
+              key={user.id}
+              meta={user.authenticated_role || "authenticated"}
+              title={user.username || user.email}
+              fields={[
+                ["Email", user.email],
+                ["Role", user.authenticated_role || "authenticated"],
+              ]}
+            />
+          )}
+          renderRow={(user) => (
+            <tr key={user.id}>
+              <td className="font-bold text-[#f7efe2]">{user.username || "-"}</td>
+              <td>
+                <TextClamp max={52}>{user.email}</TextClamp>
+              </td>
+              <td>
+                <span className="rounded-full border border-[#d9a85f]/30 bg-[#d9a85f]/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.12em] text-[#f2d59a]">
+                  {user.authenticated_role || "authenticated"}
+                </span>
+              </td>
+            </tr>
+          )}
+        />
+      ) : (
+        <AdminLoading />
+      )}
     </div>
   );
 }

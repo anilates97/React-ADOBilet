@@ -1,49 +1,46 @@
-import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { Navigate } from "react-router-dom";
 import { HashLoader } from "react-spinners";
 import { useDispatch, useSelector } from "react-redux";
 import { getUserSession, getUserSessionDatabase } from "../../redux/dataSlice";
 
 function ProtectedRouteAdmin({ children }) {
-  const navigate = useNavigate();
   const { user, userData } = useSelector((state) => state.data);
   const dispatch = useDispatch();
-  const [isLoading, setIsLoading] = useState(true); // Yükleme durumu için state
+  const [isCheckingSession, setIsCheckingSession] = useState(true);
+  const [isCheckingProfile, setIsCheckingProfile] = useState(false);
 
   useEffect(() => {
-    dispatch(getUserSession());
+    dispatch(getUserSession()).finally(() => {
+      setIsCheckingSession(false);
+    });
   }, [dispatch]);
 
   useEffect(() => {
-    if (user && Object.keys(user).length > 0 && user !== undefined) {
-      dispatch(getUserSessionDatabase(user.id));
+    if (user && Object.keys(user).length > 0) {
+      setIsCheckingProfile(true);
+      dispatch(getUserSessionDatabase(user.id)).finally(() => {
+        setIsCheckingProfile(false);
+      });
     }
   }, [dispatch, user]);
 
-  useEffect(() => {
-    if (
-      userData &&
-      Object.keys(userData).length > 0 &&
-      userData !== undefined
-    ) {
-      if (userData.authenticated_role !== "admin") {
-        navigate("/");
-      } else {
-        setIsLoading(false); // Kullanıcı verileri geldiğinde yükleme durumunu kapat
-      }
-    }
-  }, [userData, navigate]);
-
-  // Yükleme durumu kontrolü
-  if (isLoading) {
+  if (isCheckingSession || isCheckingProfile) {
     return (
-      <div className="flex justify-center items-center bg-gray-50 h-screen">
-        <HashLoader size={100} color="#404529" />
+      <div className="flex h-screen items-center justify-center bg-[#07090d]">
+        <HashLoader size={90} color="#d9a85f" />
       </div>
     );
   }
 
-  // Kullanıcı varsa uygulamayı render et
+  if (!user || Object.keys(user).length === 0) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (userData?.authenticated_role !== "admin") {
+    return <Navigate to="/" replace />;
+  }
+
   return children;
 }
 

@@ -24,6 +24,7 @@ import Users from "./pages/admin/Users/Users.jsx";
 import CategoryAddForm from "./pages/admin/Category/CategoryAddForm.jsx";
 
 import ProtectedRouteAdmin from "./pages/admin/ProtectedRouteAdmin.jsx";
+import ProtectedRouteUser from "./pages/ProtectedRouteUser.jsx";
 import CategoryUpdateForm from "./pages/admin/Category/CategoryUpdateForm.jsx";
 import EventsAdmin from "./pages/admin/Events/EventsAdmin.jsx";
 import EventUpdateForm from "./pages/admin/Events/EventUpdateForm.jsx";
@@ -75,9 +76,9 @@ const router = createBrowserRouter([
   {
     path: "/event/tickets/:id",
     element: (
-      <ProtectedRouteAdmin>
+      <ProtectedRouteUser>
         <Tickets />
-      </ProtectedRouteAdmin>
+      </ProtectedRouteUser>
     ),
   },
   {
@@ -244,7 +245,7 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: "admin/AddSeat",
+    path: "admin/addSeat",
     element: (
       <ProtectedRouteAdmin>
         <AdminLayout>

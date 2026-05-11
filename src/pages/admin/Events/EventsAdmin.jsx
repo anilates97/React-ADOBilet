@@ -6,122 +6,145 @@ import {
   getEvents,
 } from "../../../redux/dataSlice";
 import { useNavigate } from "react-router-dom";
-import { HashLoader } from "react-spinners";
-import { FaEdit } from "react-icons/fa";
-import { RiDeleteBin2Fill } from "react-icons/ri";
+import {
+  AdminActions,
+  AdminCard,
+  AdminLoading,
+  AdminTable,
+  AdminToolbar,
+  TextClamp,
+} from "../AdminShared";
 
 function EventsAdmin() {
   const dispatch = useDispatch();
-  const { eventsWithArtists } = useSelector((state) => state.data);
-
+  const { events, eventsWithArtists, eventsWithArtistsStatus } = useSelector(
+    (state) => state.data
+  );
   const navigate = useNavigate();
-
-  console.log(eventsWithArtists);
 
   useEffect(() => {
     dispatch(getEvents());
-    dispatch(getArtistWithEvents());
-  }, [dispatch]);
+    if (eventsWithArtistsStatus === "idle") {
+      dispatch(getArtistWithEvents());
+    }
+  }, [dispatch, eventsWithArtistsStatus]);
+
+  const eventRows =
+    eventsWithArtists.length > 0
+      ? eventsWithArtists
+      : events.map((event) => ({
+          ...event,
+          category: event.category || event.categories,
+          artists: event.artists || [],
+        }));
+  const isInitialLoading =
+    eventsWithArtistsStatus === "loading" && eventRows.length === 0;
 
   return (
-    <div className="flex h-full items-center flex-col p-2 overflow-x-scroll min-w-[75%] ">
-      <div className="bg-white text-black rounded-lg p-1 min-w-[75%] mx-auto  mt-20">
-        {Object.keys(eventsWithArtists).length > 0 ? (
-          <table className="min-w-[75%] mx-auto">
-            <thead className="bg-color-primary text-white">
-              <tr>
-                <th className="p-4">Name</th>
-                <th className="p-4">Hour</th>
-                <th className="p-4">Finish Hour</th>
-                <th className="p-4">Date</th>
-                <th className="p-4">Location</th>
-                <th className="p-4">Category</th>
-                <th className="p-4">Artists</th>
-                <th className="p-4">IsFree</th>
-                <th className="p-4"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {Object.keys(eventsWithArtists).length > 0 &&
-                eventsWithArtists?.map((event, i) => (
-                  <tr
-                    key={event.id}
-                    className={`${i % 2 === 0 && "bg-gray-300"} `}
-                  >
-                    <td>{event.eventName}</td>
-                    <td>{event.eventHour}</td>
-                    <td>{event.eventFinishHour}</td>
-                    <td>{event.eventDate}</td>
-                    <td>{event.eventLocation}</td>
-                    <td>{event.category?.name}</td>
-                    <td>
-                      <select
-                        name=""
-                        id=""
-                        className="rounded-lg p-2 bg-gray-500 text-white"
-                      >
-                        {event.artists &&
-                          event.artists?.map((artist) => (
-                            <option key={artist.eventId} value={artist.eventId}>
-                              {artist.artistName}
-                            </option>
-                          ))}
-                      </select>
-                    </td>
-                    <td>{event.isFree ? "Free" : "Not Free"}</td>
-                    <td className="w-[200px]">
-                      <div className="flex gap-4 ml-4">
-                        <button
-                          className="text-zinc-300 bg-red-800 p-2 rounded-lg text-[16px] hover:bg-opacity-75 transition-all duration-200 w-[100px] flex justify-center items-center space-x-2"
-                          onClick={() => {
-                            dispatch(deleteEventById(event.id));
-                          }}
-                        >
-                          <span> Delete</span>
-                          <RiDeleteBin2Fill />
-                        </button>
-                        <button
-                          className="text-zinc-300 bg-green-900 p-2 rounded-lg text-[16px] hover:bg-opacity-75 transition-all duration-200 w-[100px] flex justify-center items-center space-x-2"
-                          onClick={() => {
-                            navigate(`/admin/Event/${event.id}`, {
-                              state: {
-                                eventName: event.eventName,
-                                eventHour: event.eventHour,
-                                eventFinishHour: event.eventFinishHour,
-                                eventDate: event.eventDate,
-                                eventLocation: event.eventLocation,
-                                categoryId: event.category.id,
-                                isFree: event.isFree,
-                              },
-                            });
-                          }}
-                        >
-                          <span>Update</span>
-                          <FaEdit />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-            </tbody>
-          </table>
-        ) : (
-          <div className="flex justify-center items-center h-[600px] w-[1125px]">
-            <HashLoader size={75} color="#1F2937" />
-          </div>
-        )}
-      </div>
-      {Object.keys(eventsWithArtists).length > 0 ? (
-        <div className="mt-4">
-          <button
-            className="bg-color-primary p-4 rounded-lg hover:bg-opacity-30 transition-all duration-200 w-64"
-            onClick={() => navigate("/admin/addEvent")}
-          >
-            Add
-          </button>
-        </div>
+    <div className="grid gap-5">
+      <AdminToolbar
+        eyebrow="Event inventory"
+        title="Events"
+        copy="Maintain live event pages, timing, categories and venue metadata."
+        actionLabel="Add event"
+        onAction={() => navigate("/admin/addEvent")}
+      />
+
+      {isInitialLoading ? (
+        <AdminLoading />
       ) : (
-        <div> </div>
+        <AdminTable
+          columns={[
+            "Name",
+            "Date",
+            "Time",
+            "Location",
+            "Category",
+            "Artists",
+            "Type",
+            "Actions",
+          ]}
+          data={eventRows}
+          emptyMessage="No events found."
+          getSearchText={(event) =>
+            `${event.eventName} ${event.eventDate} ${event.eventHour} ${event.eventLocation} ${event.category?.name} ${event.artists?.map((artist) => artist.artistName).join(" ")}`
+          }
+          renderCard={(event) => (
+            <AdminCard
+              key={event.id}
+              meta={event.category?.name || "Event"}
+              title={event.eventName}
+              fields={[
+                ["Date", event.eventDate],
+                ["Time", `${event.eventHour} - ${event.eventFinishHour}`],
+                ["Location", event.eventLocation],
+                ["Artists", event.artists?.map((artist) => artist.artistName).join(", ")],
+                ["Type", event.isFree ? "Free" : "Paid"],
+              ]}
+              actions={
+                <AdminActions
+                  onDelete={() => dispatch(deleteEventById(event.id))}
+                  onUpdate={() =>
+                    navigate(`/admin/Event/${event.id}`, {
+                      state: {
+                        eventName: event.eventName,
+                        eventHour: event.eventHour,
+                        eventFinishHour: event.eventFinishHour,
+                        eventDate: event.eventDate,
+                        eventLocation: event.eventLocation,
+                        categoryId: event.category?.id,
+                        isFree: event.isFree,
+                      },
+                    })
+                  }
+                />
+              }
+            />
+          )}
+          renderRow={(event) => (
+            <tr key={event.id}>
+              <td className="font-bold text-[#f7efe2]">
+                <TextClamp max={34}>{event.eventName}</TextClamp>
+              </td>
+              <td>{event.eventDate}</td>
+              <td>
+                {event.eventHour} - {event.eventFinishHour}
+              </td>
+              <td>
+                <TextClamp max={32}>{event.eventLocation}</TextClamp>
+              </td>
+              <td>{event.category?.name || "-"}</td>
+              <td>
+                <TextClamp max={34}>
+                  {event.artists?.map((artist) => artist.artistName).join(", ") || "-"}
+                </TextClamp>
+              </td>
+              <td>
+                <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-bold uppercase tracking-[0.12em]">
+                  {event.isFree ? "Free" : "Paid"}
+                </span>
+              </td>
+              <td>
+                <AdminActions
+                  onDelete={() => dispatch(deleteEventById(event.id))}
+                  onUpdate={() =>
+                    navigate(`/admin/Event/${event.id}`, {
+                      state: {
+                        eventName: event.eventName,
+                        eventHour: event.eventHour,
+                        eventFinishHour: event.eventFinishHour,
+                        eventDate: event.eventDate,
+                        eventLocation: event.eventLocation,
+                        categoryId: event.category?.id,
+                        isFree: event.isFree,
+                      },
+                    })
+                  }
+                />
+              </td>
+            </tr>
+          )}
+        />
       )}
     </div>
   );

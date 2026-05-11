@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Button from "./Button.jsx";
-import { Link } from "react-router-dom";
 import Logo from "../LogoComp/Logo.jsx";
+import { useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getUserSession,
@@ -16,6 +16,7 @@ import { FaUserAlt } from "react-icons/fa";
 const HeaderMenu = () => {
   const dispatch = useDispatch();
   const { user, userData } = useSelector((state) => state.data);
+  const location = useLocation();
 
   useEffect(() => {
     dispatch(getUserSession());
@@ -28,9 +29,11 @@ const HeaderMenu = () => {
   }, [dispatch, user]);
 
   let Links = [];
+  const isAdmin = userData?.authenticated_role === "admin";
+
   if (user) {
     Links = [
-      userData.authenticated_role === "admin" && {
+      isAdmin && {
         name: "Admin Panel",
         link: "/admin",
       },
@@ -51,15 +54,50 @@ const HeaderMenu = () => {
     setOpen(!open);
   };
 
+  const isActiveLink = (link) => {
+    if (link === "/events") {
+      return location.pathname.startsWith("/events");
+    }
+
+    if (link === "/pastevents") {
+      return location.pathname === "/pastevents";
+    }
+
+    if (link === "/admin") {
+      return location.pathname.startsWith("/admin");
+    }
+
+    if (link === "/login") {
+      return location.pathname === "/login" || location.pathname === "/register";
+    }
+
+    return location.pathname === link;
+  };
+
+  const getLinkClass = (link) => {
+    const isActive = isActiveLink(link.link);
+    const isAdminLink = link.name === "Admin Panel";
+
+    if (isActive) {
+      return "border border-[#d9a85f]/45 bg-[#d9a85f]/14 text-[#f2d59a] shadow-[0_0_30px_rgba(217,168,95,0.12)]";
+    }
+
+    if (isAdminLink) {
+      return "text-[#d9a85f]";
+    }
+
+    return "text-[#f7efe2]";
+  };
+
   return (
-    <div className="px-7 font-bold">
-      <div className="lg:flex items-center justify-between lg:px-10 px-7 font-bold">
-        <div className="cursor-pointer flex items-center">
+    <div className="sticky top-0 z-[9999] border-b border-white/10 bg-[#07090d]/88 px-4 py-3 font-bold backdrop-blur-xl">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
+        <div className="flex min-w-0 cursor-pointer items-center">
           <Logo />
         </div>
         <div
           onClick={toggleMenu}
-          className="text-3xl absolute right-8 top-16 cursor-pointer lg:hidden"
+          className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-white/10 bg-white/5 text-3xl lg:hidden"
         >
           <ion-icon
             name={open ? "close" : "menu"}
@@ -67,36 +105,35 @@ const HeaderMenu = () => {
           ></ion-icon>
         </div>
         <ul
-          className={`lg:flex lg:items-center lg:pb-0 py-10 lg:w-auto lg:static absolute left-0 w-full transition-all duration-500 ease-in ${
+          className={`absolute left-0 w-full border-b border-white/10 px-5 py-6 transition-all duration-300 ease-out lg:static lg:flex lg:w-auto lg:items-center lg:gap-2 lg:border-b-0 lg:px-0 lg:py-0 ${
             open
-              ? "top-24 z-[999999] bg-gradient-to-b from-[#09443e] to-[#031615]"
-              : "top-[-490px] lg:bg-none bg-gradient-to-b from-[#09443e] to-[#031615]"
+              ? "top-[72px] z-[999999] bg-[#07090d]/96 shadow-[0_24px_60px_rgba(0,0,0,0.38)] backdrop-blur-xl"
+              : "top-[-560px] bg-[#07090d]/96 lg:bg-transparent"
           }`}
         >
           <>
             {user && (
-              <div className="text-white">
+              <div className="text-white lg:mr-3">
                 {Object.keys(user).length > 0 ? (
-                  <div className="flex gap-2 items-center justify-center font-bold text-2xl ">
+                  <div className="mx-auto mb-4 flex max-w-full items-center justify-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-bold text-[#f7efe2] lg:mb-0 lg:max-w-[270px]">
                     {" "}
-                    <FaUserAlt /> Welcome {userData.username}{" "}
+                    <FaUserAlt className="shrink-0" />{" "}
+                    <span className="truncate">Welcome {userData?.username || user.email}</span>{" "}
                   </div>
                 ) : (
                   <span></span>
                 )}
               </div>
             )}
-            {Links.map((link) => (
+            {Links.filter(Boolean).map((link) => (
               <li
                 key={link.name}
-                className="lg:ml-8 text-xl lg:my-0 my-7 border-b-4 border-b-white lg:bg-transparent bg-white p-2 "
+                className="mx-auto my-2 w-full max-w-sm text-sm uppercase tracking-[0.12em] lg:my-0 lg:w-fit"
               >
                 {user ? (
                   <button
-                    className={`hover:text-opacity-60 flex items-center justify-center gap-2 transition-all duration-200 mx-auto ${
-                      link.name === "Admin Panel"
-                        ? "text-green-900 lg:text-green-800 font-bold"
-                        : "lg:text-white text-green-700 font-bold"
+                    className={`mx-auto flex w-full items-center justify-center gap-2 rounded-full px-4 py-3 transition-all duration-200 hover:bg-white/10 lg:w-auto lg:py-2 ${
+                      getLinkClass(link)
                     }`}
                     onClick={() => {
                       if (link.name === "Logout") {
@@ -135,7 +172,9 @@ const HeaderMenu = () => {
                         window.location.href = "/pastevents";
                       }
                     }}
-                    className="text-white hover:text-gray-400 duration-500 flex items-center gap-2 justify-center"
+                    className={`flex w-full items-center justify-center gap-2 rounded-full px-4 py-3 duration-300 hover:bg-white/10 hover:text-[#d9a85f] lg:w-auto lg:py-2 ${getLinkClass(
+                      link
+                    )}`}
                   >
                     {link.name}{" "}
                     {link.name === "Login" ? (
@@ -153,7 +192,7 @@ const HeaderMenu = () => {
             ))}
           </>
           {!user && (
-            <a href="/register">
+            <a className="mx-auto mt-3 block w-full max-w-sm lg:mt-0 lg:w-auto" href="/register">
               <Button>Sign Up</Button>
             </a>
           )}

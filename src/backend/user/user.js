@@ -23,30 +23,71 @@ export async function getUserFromDatabase(userId) {
 }
 
 export async function signUp({ email, password, username }) {
-  const {
-    data: { user },
-  } = await supabase.auth.signUp({
-    username,
+  const { data: authData, error: signUpError } = await supabase.auth.signUp({
     email,
     password,
+    options: {
+      data: {
+        username,
+      },
+    },
   });
+
+  if (signUpError) {
+    throw new Error(signUpError.message);
+  }
+
+  const user = authData.user;
+
+  if (!user) {
+    throw new Error("User could not be created. Please check Supabase Auth settings.");
+  }
+
+  if (Array.isArray(user.identities) && user.identities.length === 0) {
+    const existingProfile = await getProfileByEmail(email);
+
+    if (existingProfile) {
+      throw new Error("EMAIL_ALREADY_REGISTERED");
+    }
+
+    throw new Error("SIGNUP_NEEDS_LOGIN");
+  }
 
   const userData = {
     id: user.id,
-    email: email,
-    username: username,
-
-    //authenticated: user.role,
-    // Diğer gerekli kullanıcı bilgileri...
+    email,
+    username,
   };
 
   const { data, error: insertError } = await supabase
     .from("users")
-    .insert([{ ...userData }]);
+    .insert([userData])
+    .select()
+    .single();
 
   if (insertError) {
-    return { error: insertError };
+    if (insertError.code === "23503") {
+      const existingProfile = await getProfileByEmail(email);
+
+      if (existingProfile) {
+        throw new Error("EMAIL_ALREADY_REGISTERED");
+      }
+
+      throw new Error("PROFILE_LINK_FAILED");
+    }
+
+    throw new Error(insertError.message);
   }
+
+  return data;
+}
+
+async function getProfileByEmail(email) {
+  const { data } = await supabase
+    .from("users")
+    .select("id")
+    .eq("email", email)
+    .maybeSingle();
 
   return data;
 }
@@ -92,7 +133,7 @@ export async function updateRoleOnLogin() {
 
     const { error: updateError } = await supabase.auth.update({
       access_token: accessToken,
-      role: "admin", // Değiştirilecek rol
+      role: "admin",
     });
 
     if (updateError) {

@@ -34,7 +34,7 @@ export async function getEventsWithArtist() {
       const { eventId, artistId } = eventArtist;
 
       if (!eventsWithArtistsAndCategories[eventId]) {
-        if (!eventId) return;
+      if (!eventId) continue;
         const { data: eventData, error: eventError } = await supabase
           .from("events")
           .select(
@@ -43,7 +43,7 @@ export async function getEventsWithArtist() {
           .eq("id", eventId)
           .single();
 
-        if (!eventData) return;
+        if (!eventData) continue;
 
         if (eventError) {
           console.error("Event error:", eventError);
@@ -56,7 +56,7 @@ export async function getEventsWithArtist() {
           .eq("id", eventData.categoryId)
           .single();
 
-        if (!categoryData) return;
+        if (!categoryData) continue;
 
         if (categoryError) {
           console.error("Category error:", categoryError);
@@ -78,7 +78,7 @@ export async function getEventsWithArtist() {
         .eq("id", artistId)
         .single();
 
-      if (!artistData) return;
+      if (!artistData) continue;
 
       if (artistError) {
         console.error("Artist error:", artistError);

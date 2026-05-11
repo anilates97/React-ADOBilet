@@ -3,33 +3,33 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   deleteSeatById,
   fetchAllSeats,
+  getEvents,
   getSeatsAdminByEvent,
-  getSeatsByEvent,
-  getTickets,
 } from "../../../redux/dataSlice";
 import { useNavigate } from "react-router-dom";
-import { FaEdit } from "react-icons/fa";
-import { RiDeleteBin2Fill } from "react-icons/ri";
-import { MdOutlineAssignmentTurnedIn } from "react-icons/md";
+import {
+  AdminActions,
+  AdminCard,
+  AdminSelect,
+  AdminTable,
+  AdminToolbar,
+} from "../AdminShared";
 
 function Seats() {
   const dispatch = useDispatch();
   const [selectedEvent, setSelectedEvent] = useState("");
   const [selectedEventName, setSelectedEventName] = useState("");
-  const { allSeats, seatsAdmin } = useSelector((state) => state.data);
+  const { events, seatsAdmin } = useSelector((state) => state.data);
   const navigate = useNavigate();
 
   useEffect(() => {
     dispatch(fetchAllSeats());
+    dispatch(getEvents());
+  }, [dispatch]);
 
-    if (
-      allSeats &&
-      Object.keys(allSeats).length > 0 &&
-      allSeats !== undefined
-    ) {
-      if (selectedEvent) {
-        dispatch(getSeatsAdminByEvent(selectedEvent));
-      }
+  useEffect(() => {
+    if (selectedEvent) {
+      dispatch(getSeatsAdminByEvent(selectedEvent));
     }
   }, [dispatch, selectedEvent]);
 
@@ -37,31 +37,26 @@ function Seats() {
     eventId: selectedEvent,
     eventName: selectedEventName,
   };
-  const uniqueEvents = [];
-
-  if (allSeats) {
-    allSeats.forEach((seat) => {
-      const eventId = seat.events?.id;
-      const eventName = seat.events?.eventName;
-
-      const foundEvent = uniqueEvents.find(
-        (event) => event.eventId === eventId
-      );
-
-      if (!foundEvent) {
-        uniqueEvents.push({ eventId, eventName });
-      }
-    });
-  }
 
   return (
-    <div className="flex h-full items-center  flex-col p-2 overflow-x-scroll min-w-[75%] ">
-      <h1 className="text-4xl mb-6 mt-32">SEATS</h1>
-      <div className="w-full md:w-64 text-black rounded-lg p-3 mb-4 ">
-        <select
-          name=""
-          className="w-full md:w-64 rounded-lg p-4 border-4 outline-none"
-          id=""
+    <div className="grid gap-5">
+      <AdminToolbar
+        eyebrow="Seat inventory"
+        title="Seats"
+        copy="Choose an event to assign, update or remove seats."
+        actionLabel={selectedEvent ? "Add seat" : "Add new seat"}
+        onAction={() =>
+          navigate("/admin/addSeat", {
+            state: {
+              selectedEventObj,
+              isNew: !selectedEvent,
+            },
+          })
+        }
+      >
+        <AdminSelect
+          label="Event"
+          value={selectedEvent || "chooseOne"}
           onChange={(e) => {
             const selectedOption = e.target.options[e.target.selectedIndex];
             setSelectedEvent(
@@ -70,128 +65,109 @@ function Seats() {
             setSelectedEventName(selectedOption.text);
           }}
         >
-          <option value="chooseOne">Choose One</option>
-          {uniqueEvents.map((event) => (
-            <option key={event.eventId} value={event.eventId}>
+          <option value="chooseOne">Choose event</option>
+          {events.map((event) => (
+            <option key={event.id} value={event.id}>
               {event.eventName}
             </option>
           ))}
-        </select>
-      </div>
+        </AdminSelect>
+      </AdminToolbar>
 
-      <div className="bg-white text-black rounded-lg p-1  mx-auto ">
-        {selectedEvent ? (
-          <table className="min-w-[75%] mx-auto">
-            <thead className="bg-color-primary text-white">
-              <tr>
-                <th className="p-4">Name</th>
-                <th className="p-4">Availability</th>
-                <th className="p-4">Seat State</th>
-
-                <th className="p-4"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {seatsAdmin.map((seat, i) => (
-                <tr
-                  key={seat.id}
-                  className={`${i % 2 === 0 && "bg-gray-300"} `}
-                >
-                  <td className="p-4">{seat.seatName}</td>
-                  <td>{seat.availability ? "Empty" : "Full"}</td>
-                  <td>
-                    {seat.status === "ASSIGNED"
-                      ? "Assigned"
-                      : seat.status === "SOLD"
-                      ? "Sold"
-                      : "Not Assigned"}
-                  </td>
-
-                  <td className="w-[300px]">
-                    <div className="flex justify-end space-x-2">
-                      {seat.status !== "ASSIGNED" && seat.status !== "SOLD" && (
-                        <button
-                          className="text-zinc-300 bg-gray-700 p-2 rounded-lg text-[16px] hover:bg-opacity-75 transition-all duration-200 w-[100px] flex justify-center items-center space-x-2"
-                          onClick={() => {
-                            console.log("seatid", seat.id);
-                            navigate(`/admin/AssignTicket/${seat.id}`, {
-                              state: {
-                                seat,
-                                selectedEventObj,
-                              },
-                            });
-                          }}
-                        >
-                          <span>Assign</span>
-                          <MdOutlineAssignmentTurnedIn />
-                        </button>
-                      )}
-                      <button
-                        className="text-zinc-300 bg-red-800 p-2 rounded-lg text-[16px] hover:bg-opacity-75 transition-all duration-200 w-[100px] flex justify-center items-center space-x-2"
-                        onClick={() => {
-                          console.log("seatid", seat.id);
-                          dispatch(deleteSeatById(seat.id));
-                        }}
-                      >
-                        <span> Delete</span>
-                        <RiDeleteBin2Fill />
-                      </button>
-                      <button
-                        className="text-zinc-300 bg-green-900 p-2 rounded-lg text-[16px] hover:bg-opacity-75 transition-all duration-200 w-[100px] flex justify-center items-center space-x-2"
-                        onClick={() => {
-                          navigate(`/admin/Seats/${seat.id}`, {
+      {selectedEvent ? (
+        <AdminTable
+          columns={["Seat", "Availability", "State", "Actions"]}
+          data={seatsAdmin}
+          emptyMessage="No seats found for this event."
+          getSearchText={(seat) =>
+            `${seat.seatName} ${seat.availability ? "Empty" : "Full"} ${seat.status}`
+          }
+          renderCard={(seat) => (
+            <AdminCard
+              key={seat.id}
+              meta={seat.status || "Seat"}
+              title={seat.seatName}
+              fields={[
+                ["Availability", seat.availability ? "Empty" : "Full"],
+                [
+                  "State",
+                  seat.status === "ASSIGNED"
+                    ? "Assigned"
+                    : seat.status === "SOLD"
+                    ? "Sold"
+                    : "Created",
+                ],
+              ]}
+              actions={
+                <AdminActions
+                  onAssign={
+                    seat.status !== "ASSIGNED" && seat.status !== "SOLD"
+                      ? () =>
+                          navigate(`/admin/AssignTicket/${seat.id}`, {
                             state: {
                               seat,
                               selectedEventObj,
                             },
-                          });
-                        }}
-                      >
-                        <span>Update</span>
-                        <FaEdit />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : (
-          <div>You didn't select event! </div>
-        )}
-      </div>
-      <div>
-        {!selectedEvent && (
-          <button
-            className="bg-color-primary p-2 rounded-lg hover:bg-opacity-30 transition-all duration-200 mt-6 w-64"
-            onClick={() => {
-              navigate("/admin/addSeat", {
-                state: {
-                  selectedEventObj,
-                  isNew: true,
-                },
-              });
-            }}
-          >
-            Add New Seat
-          </button>
-        )}
-      </div>
-
-      {selectedEvent && (
-        <div className="mt-4">
-          <button
-            className="bg-gray-800 p-4 rounded-lg hover:bg-opacity-75 transition-all duration-200 w-64"
-            onClick={() =>
-              navigate("/admin/addSeat", {
-                state: {
-                  selectedEventObj,
-                },
-              })
-            }
-          >
-            Add Seat
-          </button>
+                          })
+                      : null
+                  }
+                  onDelete={() => dispatch(deleteSeatById(seat.id))}
+                  onUpdate={() =>
+                    navigate(`/admin/Seats/${seat.id}`, {
+                      state: {
+                        seat,
+                        selectedEventObj,
+                      },
+                    })
+                  }
+                />
+              }
+            />
+          )}
+          renderRow={(seat) => (
+            <tr key={seat.id}>
+              <td className="font-bold text-[#f7efe2]">{seat.seatName}</td>
+              <td>{seat.availability ? "Empty" : "Full"}</td>
+              <td>
+                <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-bold uppercase tracking-[0.12em]">
+                  {seat.status === "ASSIGNED"
+                    ? "Assigned"
+                    : seat.status === "SOLD"
+                    ? "Sold"
+                    : "Created"}
+                </span>
+              </td>
+              <td>
+                <AdminActions
+                  onAssign={
+                    seat.status !== "ASSIGNED" && seat.status !== "SOLD"
+                      ? () =>
+                          navigate(`/admin/AssignTicket/${seat.id}`, {
+                            state: {
+                              seat,
+                              selectedEventObj,
+                            },
+                          })
+                      : null
+                  }
+                  onDelete={() => dispatch(deleteSeatById(seat.id))}
+                  onUpdate={() =>
+                    navigate(`/admin/Seats/${seat.id}`, {
+                      state: {
+                        seat,
+                        selectedEventObj,
+                      },
+                    })
+                  }
+                />
+              </td>
+            </tr>
+          )}
+        />
+      ) : (
+        <div className="admin-empty-state">
+          <div className="admin-empty-orb">?</div>
+          <p>Select an event to inspect seat inventory.</p>
         </div>
       )}
     </div>

@@ -16,6 +16,7 @@ export async function getSeats(eventId) {
     return data;
   } catch (e) {
     console.log(e);
+    throw e;
   }
 }
 
@@ -37,5 +38,6 @@ export async function selectSeat(seatId) {
     return data;
   } catch (e) {
     console.log(e);
+    throw e;
   }
 }

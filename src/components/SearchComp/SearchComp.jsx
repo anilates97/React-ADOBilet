@@ -4,13 +4,17 @@ import { getArtistWithEvents } from "../../redux/dataSlice";
 import EventsComp from "../EventsComp/EventsComp";
 
 const SearchComp = ({ word, date, place }) => {
-  const { eventsWithArtists } = useSelector((state) => state.data);
+  const { eventsWithArtists, eventsWithArtistsStatus } = useSelector(
+    (state) => state.data
+  );
   const dispatch = useDispatch();
   const [searchedEvents, setSearchedEvents] = useState([]);
 
   useEffect(() => {
-    dispatch(getArtistWithEvents());
-  }, [dispatch]);
+    if (eventsWithArtistsStatus === "idle") {
+      dispatch(getArtistWithEvents());
+    }
+  }, [dispatch, eventsWithArtistsStatus]);
   useEffect(() => {
     // DatePicker tarafından gelen tarihi database formatına çevirme
     const datePickerToDatabaseFormat = (datePickerDate) => {
