@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { FaCalendarAlt, FaClock, FaMapMarkerAlt } from "react-icons/fa";
+import { getEventImage, getFallbackImage } from "../../eventUtils";
 
 const EventsCard = ({ event, path }) => {
   const {
@@ -31,9 +32,12 @@ const EventsCard = ({ event, path }) => {
     <article className="premium-card group flex min-h-[560px] w-full max-w-[410px] flex-col text-left transition duration-300 hover:-translate-y-2 hover:border-[#d9a85f]/50">
       <div className="relative h-64 overflow-hidden">
         <img
-          src={event.artists[0]?.artistPhoto}
+          src={getEventImage(event)}
           alt={eventName}
           className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
+          onError={(e) => {
+            e.currentTarget.src = getFallbackImage(event);
+          }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[#07090d] via-transparent to-transparent"></div>
         <div className="absolute left-4 top-4 rounded-full border border-white/15 bg-black/45 px-3 py-1 text-xs font-extrabold uppercase tracking-[0.14em] text-[#f2d59a] backdrop-blur">

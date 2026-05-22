@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   buyTicketOfEvent,
+  getEventSingle,
   getPhotosByEvent,
   getSeatsByEvent,
   getTickets,
@@ -12,9 +13,10 @@ import HeaderMenu from "../components/Header/HeaderMenu";
 import Seats from "../components/SeatsComp/Seats";
 import Footer from "../components/FooterComp/Footer";
 import { HashLoader } from "react-spinners";
+import { getFallbackImage, getPhotoImage, isPastEvent } from "../eventUtils";
 
 const Tickets = () => {
-  const { seats, selectedSeat, eventPhotos } = useSelector((state) => state.data);
+  const { seats, selectedSeat, eventPhotos, event } = useSelector((state) => state.data);
   const [isLoadingSeats, setIsLoadingSeats] = useState(true);
   const [isBuying, setIsBuying] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -22,7 +24,13 @@ const Tickets = () => {
   const dispatch = useDispatch();
   const { id } = useParams();
 
-  const hasSelectedSeat = selectedSeat && Object.keys(selectedSeat).length > 0;
+  const eventData = event?.event;
+  const selectedSeatBelongsToEvent =
+    String(selectedSeat?.events?.id) === String(id);
+  const hasSelectedSeat =
+    selectedSeatBelongsToEvent && Object.keys(selectedSeat || {}).length > 0;
+  const eventDate = eventData?.eventDate || selectedSeat?.events?.eventDate;
+  const pastEvent = isPastEvent(eventDate);
   const selectedCategory =
     selectedSeat?.ticketPricing?.ticketCategories?.categoryName || "Standard";
 
@@ -60,6 +68,11 @@ const Tickets = () => {
       return;
     }
 
+    if (pastEvent) {
+      setErrorMessage("This event has ended. Ticket sales are closed.");
+      return;
+    }
+
     if (!selectedSeat?.ticketPricing?.id || !selectedSeat?.events?.id) {
       setErrorMessage("This seat is not ready for sale. Please select another seat.");
       return;
@@ -86,11 +99,13 @@ const Tickets = () => {
 
   useEffect(() => {
     setIsLoadingSeats(true);
-    Promise.all([dispatch(getSeatsByEvent(id)), dispatch(getTickets(id))]).finally(
-      () => {
-        setIsLoadingSeats(false);
-      }
-    );
+    Promise.all([
+      dispatch(getEventSingle(id)),
+      dispatch(getSeatsByEvent(id)),
+      dispatch(getTickets(id)),
+    ]).finally(() => {
+      setIsLoadingSeats(false);
+    });
   }, [dispatch, id]);
 
   return (
@@ -127,9 +142,20 @@ const Tickets = () => {
                 </div>
               </div>
 
+              {pastEvent && (
+                <div className="mb-5 border border-[#d9a85f]/30 bg-[#d9a85f]/10 px-4 py-3 text-sm font-bold text-[#f2d59a]">
+                  This event has ended. Seat selection and ticket sales are closed.
+                </div>
+              )}
+
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
                 {seats.map((seat) => (
-                  <Seats seat={seat} key={seat.id} onSelect={onSelectSeat} />
+                  <Seats
+                    seat={seat}
+                    key={seat.id}
+                    onSelect={onSelectSeat}
+                    disabled={pastEvent}
+                  />
                 ))}
               </div>
             </div>
@@ -184,7 +210,7 @@ const Tickets = () => {
               <button
                 className="premium-btn mt-7 w-full px-6 disabled:cursor-not-allowed disabled:opacity-60"
                 onClick={handleBuyTicket}
-                disabled={isBuying || !hasSelectedSeat}
+                disabled={isBuying || !hasSelectedSeat || pastEvent}
               >
                 {isBuying ? "Processing..." : "Buy Ticket"}
               </button>
@@ -192,8 +218,11 @@ const Tickets = () => {
               {eventPhotos && eventPhotos.length > 0 && (
                 <img
                   className="mt-7 h-64 w-full rounded-[8px] object-cover"
-                  src={eventPhotos[0].eventPhoto}
-                  alt="Event"
+                  src={getPhotoImage(eventPhotos[0], eventData)}
+                  alt={eventData?.eventName || "Event"}
+                  onError={(e) => {
+                    e.currentTarget.src = getFallbackImage(eventData);
+                  }}
                 />
               )}
             </aside>

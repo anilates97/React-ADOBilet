@@ -7,6 +7,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/pagination";
 import { Pagination } from "swiper/modules";
+import { isUpcomingEvent } from "../../eventUtils";
 
 const SliderComp = () => {
   const { eventsWithArtists, eventsWithArtistsStatus } = useSelector(
@@ -21,6 +22,9 @@ const SliderComp = () => {
   }, [dispatch, eventsWithArtistsStatus]);
 
   const width = window.innerWidth;
+  const upcomingEvents = eventsWithArtists.filter((event) =>
+    isUpcomingEvent(event.eventDate)
+  );
 
   return (
     <section className="premium-section">
@@ -35,7 +39,7 @@ const SliderComp = () => {
         </p>
       </div>
 
-      {eventsWithArtists?.length > 0 ? (
+      {upcomingEvents?.length > 0 ? (
         <>
           <img
             className="absolute inset-0 -z-10 h-full w-full object-cover opacity-[0.04]"
@@ -51,7 +55,7 @@ const SliderComp = () => {
             modules={[Pagination]}
             className="mySwiper !py-[40px]"
           >
-            {eventsWithArtists.map((events, i) => (
+            {upcomingEvents.map((events, i) => (
               <SwiperSlide key={i}>
                 <SliderCard events={events} />
               </SwiperSlide>

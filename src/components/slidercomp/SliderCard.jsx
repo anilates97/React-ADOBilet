@@ -1,8 +1,8 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { getEventImage, getFallbackImage } from "../../eventUtils";
 
 const SliderCard = ({ events }) => {
-  const { artists } = events;
   const navigate = useNavigate();
 
   const handleScrollToTop = () => {
@@ -20,8 +20,11 @@ const SliderCard = ({ events }) => {
     <article className="premium-card group relative h-[390px] cursor-pointer">
       <img
         className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105"
-        src={artists[0]?.artistPhoto}
+        src={getEventImage(events)}
         alt={events.eventName}
+        onError={(e) => {
+          e.currentTarget.src = getFallbackImage(events);
+        }}
       />
       <div className="absolute inset-0 bg-gradient-to-t from-[#07090d] via-[#07090d]/52 to-transparent"></div>
       <div className="absolute left-4 top-4 rounded-full border border-white/15 bg-black/40 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-[#f2d59a] backdrop-blur">

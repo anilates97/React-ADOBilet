@@ -5,6 +5,7 @@ import { getArtistWithEvents } from "../redux/dataSlice";
 import { useLocation } from "react-router-dom";
 import HeaderMenu from "../components/Header/HeaderMenu";
 import Footer from "../components/FooterComp/Footer";
+import { isPastEvent } from "../eventUtils";
 
 const PastEvents = () => {
   const location = useLocation();
@@ -20,6 +21,10 @@ const PastEvents = () => {
       dispatch(getArtistWithEvents());
     }
   }, [dispatch, eventsWithArtistsStatus]);
+
+  const pastEvents = eventsWithArtists.filter((event) =>
+    isPastEvent(event.eventDate)
+  );
 
   const renderSkeletonCards = () => (
     <div className="mx-auto grid max-w-7xl grid-cols-1 justify-items-center gap-7 px-5 py-10 md:grid-cols-2 xl:grid-cols-3">
@@ -51,8 +56,8 @@ const PastEvents = () => {
           <h1>Past Events</h1>
           <p>Browse previous experiences and keep the event catalogue complete.</p>
         </div>
-        {eventsWithArtists.length > 0 ? (
-          <EventsComp events={eventsWithArtists} path={path} />
+        {pastEvents.length > 0 ? (
+          <EventsComp events={pastEvents} path={path} />
         ) : eventsWithArtistsStatus === "loading" ? (
           renderSkeletonCards()
         ) : (

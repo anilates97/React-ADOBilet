@@ -1,5 +1,29 @@
 import supabase from "../supabase";
+import { getDemoEventById, isPastEvent } from "../../eventUtils";
 export async function getEventTickets(eventId) {
+  const demoEvent = getDemoEventById(eventId);
+  if (demoEvent) {
+    return Array.from({ length: 30 }, (_, index) => {
+      const seatNumber = index + 1;
+      const categoryName =
+        seatNumber <= 6 ? "VIP" : seatNumber <= 18 ? "Normal" : "Ogrenci";
+      const price = seatNumber <= 6 ? 950 : seatNumber <= 18 ? 600 : 350;
+
+      return {
+        id: Number(`${demoEvent.id}${seatNumber}`),
+        ticketCategories: {
+          id: Number(`${demoEvent.id}${seatNumber}`),
+          categoryName,
+          price,
+        },
+        events: {
+          id: demoEvent.id,
+          eventName: demoEvent.eventName,
+        },
+      };
+    });
+  }
+
   try {
     let query = supabase
       .from("ticketPricing")
@@ -47,6 +71,30 @@ export async function getSoldTickets() {
 export async function buyTicket(eventId, seatId, ticketId) {
   console.log("eventId =>", eventId, "seatId =>", seatId);
   try {
+    const demoEvent = getDemoEventById(eventId);
+    if (demoEvent) {
+      if (isPastEvent(demoEvent.eventDate)) {
+        throw new Error("This event has ended. Ticket sales are closed.");
+      }
+
+      return { success: true, eventId, seatId, ticketId };
+    }
+
+    const { data: eventData, error: eventError } = await supabase
+      .from("events")
+      .select("eventDate")
+      .eq("id", eventId)
+      .single();
+
+    if (eventError) {
+      console.error(eventError);
+      throw new Error("Event could not be loaded");
+    }
+
+    if (isPastEvent(eventData?.eventDate)) {
+      throw new Error("This event has ended. Ticket sales are closed.");
+    }
+
     const updateSeat = await supabase
       .from("seats")
       .update({ availability: false, ticketId: null, status: "SOLD" })

@@ -65,6 +65,7 @@ import {
   createTicket,
   getTicketOfEvent,
 } from "../backend/admin/AssignTicket/assignTicket";
+import { mergeDemoUpcomingEvents } from "../eventUtils";
 
 const initialState = {
   eventsWithArtistsStatus: "idle",
@@ -514,7 +515,7 @@ const dataSlice = createSlice({
         state.eventsWithArtistsStatus = "loading";
       })
       .addCase(getArtistWithEvents.fulfilled, (state, action) => {
-        state.eventsWithArtists = action.payload || [];
+        state.eventsWithArtists = mergeDemoUpcomingEvents(action.payload || []);
         state.eventsWithArtistsStatus = "succeeded";
       })
       .addCase(getArtistWithEvents.rejected, (state) => {

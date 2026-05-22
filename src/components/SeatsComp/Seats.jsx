@@ -1,15 +1,16 @@
-function Seats({ seat, onSelect }) {
+function Seats({ seat, onSelect, disabled = false }) {
   const category = seat.ticketPricing?.ticketCategories?.categoryName;
   const isSold = seat.status === "SOLD";
+  const isDisabled = isSold || disabled;
 
   function handleSelectSeat(seatId) {
-    if (!isSold) {
+    if (!isDisabled) {
       onSelect(seatId);
     }
   }
 
   function getSeatClasses() {
-    if (isSold) {
+    if (isDisabled) {
       return "border-white/10 bg-white/[0.04] text-[#677284] opacity-60";
     }
 
@@ -29,10 +30,10 @@ function Seats({ seat, onSelect }) {
 
   return (
     <button
-      disabled={isSold}
+      disabled={isDisabled}
       className={`h-16 border text-sm font-extrabold transition ${getSeatClasses()}`}
       onClick={() => handleSelectSeat(seat.id)}
-      title={isSold ? "Sold" : category || "Seat"}
+      title={disabled ? "Ticket sales closed" : isSold ? "Sold" : category || "Seat"}
     >
       {seat.seatName}
     </button>

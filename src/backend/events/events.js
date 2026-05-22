@@ -1,6 +1,12 @@
 import supabase from "../supabase";
+import { getDemoEventById, getFallbackImage } from "../../eventUtils";
 
 export async function getEventPhotos(eventId) {
+  const demoEvent = getDemoEventById(eventId);
+  if (demoEvent) {
+    return [{ id: `demo-photo-${eventId}`, eventId, eventPhoto: getFallbackImage(demoEvent) }];
+  }
+
   try {
     const { data, error } = await supabase
       .from("eventPhotos")
@@ -99,6 +105,11 @@ export async function getEventsWithArtist() {
   }
 }
 export async function getEvent(eventId) {
+  const demoEvent = getDemoEventById(eventId);
+  if (demoEvent) {
+    return { event: demoEvent };
+  }
+
   try {
     const { data: eventData, error: eventError } = await supabase
       .from("events")

@@ -14,14 +14,15 @@ import { Navigation } from "swiper/modules";
 import DetailsSlider from "./DetailsSlider";
 import { useNavigate } from "react-router-dom";
 import MapsComp from "./MapsComp";
+import { getEventImage, getFallbackImage, isPastEvent } from "../../eventUtils";
 
 const DetailsComp = ({ id, path }) => {
   const { event, eventPhotos, user } = useSelector((state) => state.data);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const artists = event.event ? [...event.event.artists] : [];
-  const artistImg = artists.map((artist) => artist.artistPhoto);
   const href = window.location.href;
+  const eventData = event.event;
+  const pastEvent = isPastEvent(eventData?.eventDate);
 
   useEffect(() => {
     dispatch(getEventSingle(id));
@@ -60,47 +61,55 @@ const DetailsComp = ({ id, path }) => {
           <div className="premium-card p-3">
             <img
               className="h-[420px] w-full rounded-[6px] object-cover"
-              src={artistImg[0]}
+              src={getEventImage(eventData)}
               alt={event.event?.eventName || "Event"}
+              onError={(e) => {
+                e.currentTarget.src = getFallbackImage(eventData);
+              }}
             />
           </div>
 
-          {event.event && (
+          {eventData && (
             <div className="glass-panel flex flex-col justify-between p-7 text-left">
               <div>
                 <div className="section-eyebrow">Event details</div>
                 <h2 className="mt-4 text-5xl font-bold uppercase leading-none text-[#f7efe2]">
-                  {event.event.eventName}
+                  {eventData.eventName}
                 </h2>
                 <p className="mt-6 text-base leading-8 text-[#c7ced8]">
-                  {event.event.eventDesc}
+                  {eventData.eventDesc}
                 </p>
                 <div className="mt-7 grid gap-4 text-sm font-bold text-[#e7edf5]">
                   <div className="flex items-center gap-3">
                     <FaClock className="text-[#26d0b1]" />
-                    {event.event.eventHour} - {event.event.eventFinishHour}
+                    {eventData.eventHour} - {eventData.eventFinishHour}
                   </div>
                   <div className="flex items-center gap-3">
                     <FaCalendarAlt className="text-[#26d0b1]" />
-                    {event.event.eventDate}
+                    {eventData.eventDate}
                   </div>
                   <div className="flex items-center gap-3">
                     <FaMapMarkerAlt className="text-[#26d0b1]" />
-                    {event.event.eventLocation}
+                    {eventData.eventLocation}
                   </div>
                 </div>
               </div>
-              {!path && (
+              {!path && !pastEvent && (
                 <button
                   className="premium-btn mt-8 w-full px-6"
                   onClick={() => {
                     isLoggedIn()
-                      ? navigate(`/event/tickets/${event.event.id}`)
+                      ? navigate(`/event/tickets/${eventData.id}`)
                       : navigate(`/login`);
                   }}
                 >
                   Buy a Ticket
                 </button>
+              )}
+              {pastEvent && (
+                <div className="mt-8 border border-[#d9a85f]/30 bg-[#d9a85f]/10 px-4 py-3 text-center text-sm font-bold uppercase tracking-[0.12em] text-[#f2d59a]">
+                  This event has ended. Ticket sales are closed.
+                </div>
               )}
             </div>
           )}
@@ -112,7 +121,7 @@ const DetailsComp = ({ id, path }) => {
                 Find the location
               </h3>
             </div>
-            <MapsComp location={event?.event?.eventLocation} />
+            <MapsComp location={eventData?.eventLocation} />
           </aside>
         </div>
       </section>
@@ -130,7 +139,7 @@ const DetailsComp = ({ id, path }) => {
           >
             {eventPhotos.map((photo, i) => (
               <SwiperSlide key={i}>
-                <DetailsSlider photo={photo} />
+                <DetailsSlider photo={photo} event={eventData} />
               </SwiperSlide>
             ))}
           </Swiper>

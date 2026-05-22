@@ -6,6 +6,7 @@ import { getArtistWithEvents } from "../redux/dataSlice";
 import { useParams } from "react-router-dom";
 import HeaderMenu from "../components/Header/HeaderMenu";
 import Footer from "../components/FooterComp/Footer";
+import { isUpcomingEvent } from "../eventUtils";
 
 const Events = () => {
   const { eventsWithArtists, eventsWithArtistsStatus } = useSelector(
@@ -15,49 +16,9 @@ const Events = () => {
   const { categoryName } = useParams();
   const [filteredEvents, setFilteredEvents] = useState([]);
 
-  const currentDate = new Date();
-  const formattedDate = currentDate.toLocaleDateString("en-GB");
-
-  const convertToDate = (dateString) => {
-    const [day, month, year] = dateString.split(".");
-    const formattedDate = new Date(`${year}-${month}-${day}`);
-    return formattedDate.toLocaleDateString("en-GB");
-  };
-
-  const compareDates = (date1, date2) => {
-    const [day1, month1, year1] = date1.split("/");
-    const [day2, month2, year2] = date2.split("/");
-
-    if (year1 < year2) {
-      return false;
-    } else if (year1 > year2) {
-      return true;
-    } else {
-      if (month1 < month2) {
-        return false;
-      } else if (month1 > month2) {
-        return true;
-      } else {
-        if (day1 < day2) {
-          return false;
-        } else if (day1 > day2) {
-          return true;
-        } else {
-          return true;
-        }
-      }
-    }
-  };
-
-  const checkedData = filteredEvents.filter((event) => {
-    const filtered = convertToDate(event.eventDate);
-
-    if (!compareDates(filtered, formattedDate)) {
-      return null;
-    }
-
-    return filtered;
-  });
+  const upcomingEvents = filteredEvents.filter((event) =>
+    isUpcomingEvent(event.eventDate)
+  );
 
   const dispatch = useDispatch();
 
@@ -130,8 +91,8 @@ const Events = () => {
             clickedCategory={categoryName}
             onSelectCategory={handleCategorySelect}
           />
-          {checkedData.length > 0 ? (
-            <EventsComp events={filteredEvents} categoryName={categoryName} />
+          {upcomingEvents.length > 0 ? (
+            <EventsComp events={upcomingEvents} categoryName={categoryName} />
           ) : (
             <section className="premium-section !pt-8">
               <div className="empty-state-panel">
