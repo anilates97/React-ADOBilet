@@ -1,156 +1,371 @@
 # ADO Bilet
 
-ADO Bilet is a React-based event ticket platform developed as a team project.
+ADO Bilet is a React-based event ticket platform built with Supabase, Redux Toolkit, React Router, protected user/admin routes, event browsing, seat selection, ticket purchasing, and admin management screens.
 
-The application allows users to browse events, filter listings and manage ticket-related interactions through a responsive and modern user interface.
-
-The project focuses on frontend architecture, responsive UI development, state management and component-based application structure.
+The project was redesigned from a basic event listing interface into a fuller ticket platform experience with a stronger public UI, protected ticket flow, Supabase-backed data operations, and an admin panel for managing platform content.
 
 ---
 
-# Project Overview
+## About the Project
 
-This project was developed to practice modern React development workflows and collaborative team-based frontend development.
+ADO Bilet focuses on the main flows of an event ticketing product:
 
-The application includes event listing pages, filtering systems, responsive layouts and admin-focused interfaces designed for ticket platform management.
+- Browsing upcoming and past events
+- Searching events by keyword, date, and location
+- Viewing event details
+- Registering and signing in users
+- Selecting seats
+- Buying tickets
+- Managing events and ticket data from an admin panel
 
----
-
-# Key Features
-
-- React-based frontend architecture
-- Responsive UI design
-- Event listing and filtering system
-- Ticket purchase flow interfaces
-- Redux state management
-- Admin panel components
-- Component-based architecture
-- Dynamic page rendering
-- Mobile-friendly layouts
-- Modern frontend development workflow
+The application uses React for the interface, Redux Toolkit for async state management, React Router for page routing, and Supabase for authentication and database operations.
 
 ---
 
-# Technologies Used
+## Main Features
 
-## Frontend
+- React 18 application structure
+- Supabase Auth integration
+- Supabase database operations
+- Redux Toolkit store and async thunks
+- React Router page routing
+- Protected user ticket routes
+- Protected admin routes
+- Event listing and filtering
+- Event detail pages
+- Category-based event pages
+- Upcoming and past event separation
+- Seat selection flow
+- Ticket purchase flow
+- Sold seat update logic
+- Ticket success page
+- Admin dashboard layout
+- Admin CRUD modules
+- Demo fallback events for portfolio presentation
+- Event image fallback handling
+- Loading states with React Spinners
+- Responsive redesigned UI
+
+---
+
+## Screenshots
+
+### Home Page
+
+![Home Page](src/assets/screenshots/home-page.png)
+
+### Event Details
+
+![Event Details](src/assets/screenshots/event-details.png)
+
+### Ticket Selection
+
+![Ticket Selection](src/assets/screenshots/ticket-selection.png)
+
+### Admin Dashboard
+
+![Admin Dashboard](src/assets/screenshots/admin-dashboard.png)
+
+---
+
+## User Features
+
+Users can browse events, open event detail pages, register, log in, select a seat, and complete the ticket purchase flow.
+
+The ticket page checks whether the event is still available for sale, prevents ticket purchase for past events, updates seat availability, and redirects the user to a success page after purchase.
+
+---
+
+## Admin Features
+
+The admin panel includes management screens for:
+
+- Categories
+- Artists
+- Events
+- Event photos
+- Seats
+- Users
+- Ticket categories
+- Ticket prices
+- Ticket assignment
+
+Admin pages are protected with a route guard. The app checks the active Supabase session and then verifies the user's role from the database before allowing access to admin screens.
+
+---
+
+## Tech Stack
+
+### Frontend
+
 - React
-- Redux
 - JavaScript
-- HTML5
-- CSS3
+- React Router DOM
+- Redux Toolkit
+- React Redux
 - Tailwind CSS
+- CSS
+- Swiper
+- React Icons
+- React Spinners
+- Formik
+- Yup
 
-## Architecture & Development
-- Component-Based Architecture
-- State Management
-- Responsive Design
+### Backend / Data
 
-## Tools
+- Supabase
+- Supabase Auth
+- Supabase Database
+- Environment-based Supabase configuration
+
+### Integrations
+
+- Google Maps API package
+- Axios
+- UUID
+
+### Tools
+
 - Git
 - GitHub
 - Vercel
+- npm
 
 ---
 
-# Project Structure
+## Project Structure
 
 ```text
-ADOBilet-React/
-├── components/
-├── pages/
-├── redux/
-├── services/
-├── assets/
-├── styles/
-└── App.js
+React-ADOBilet
+├── public
+├── src
+│   ├── assets
+│   ├── backend
+│   │   ├── admin
+│   │   ├── artists
+│   │   ├── categories
+│   │   ├── events
+│   │   ├── seats
+│   │   ├── tickets
+│   │   ├── user
+│   │   └── supabase.js
+│   ├── components
+│   ├── pages
+│   │   └── admin
+│   ├── redux
+│   ├── App.js
+│   ├── eventUtils.js
+│   └── index.js
+├── package.json
+└── README.md
 ```
 
 ---
 
-# Main Features
+## Routing
 
-The platform includes several core functionalities:
+The application uses React Router for public, user-protected, and admin-protected pages.
 
-- Event browsing
-- Category filtering
-- Responsive event cards
-- Ticket interaction flow
-- Admin-focused management pages
-- Navigation and routing structure
-- State-based UI updates
+Main public routes include:
+
+```text
+/
+```
+
+```text
+/login
+```
+
+```text
+/register
+```
+
+```text
+/details/:id
+```
+
+```text
+/events
+```
+
+```text
+/events/:categoryName
+```
+
+```text
+/pastevents
+```
+
+```text
+/contact
+```
+
+User-protected ticket route:
+
+```text
+/event/tickets/:id
+```
+
+Admin routes include:
+
+```text
+/admin/Dashboard
+```
+
+```text
+/admin/Categories
+```
+
+```text
+/admin/Events
+```
+
+```text
+/admin/Artists
+```
+
+```text
+/admin/Seats
+```
+
+```text
+/admin/Users
+```
+
+```text
+/admin/TicketCategories
+```
 
 ---
 
-# Architecture
+## Supabase Configuration
 
-The project follows a modular React architecture.
+Supabase is configured through environment variables.
 
-- Components are separated into reusable UI structures
-- Redux is used for state management
-- Routing is handled through React application structure
-- Tailwind CSS is used for responsive UI styling
-- Services manage frontend data interactions
+Create a `.env` file in the project root:
 
-This structure improves scalability and maintainability.
+```env
+REACT_APP_SUPABASE_URL=your_supabase_url
+REACT_APP_SUPABASE_KEY=your_supabase_anon_key
+```
 
----
-
-# Live Demo
-
-- Live Website: https://ado-bilet-react.vercel.app/
+The app expects both values to exist before creating the Supabase client.
 
 ---
 
-# Installation
+## Data Flow
 
-## 1. Clone the Repository
+ADO Bilet keeps most remote data operations under the `src/backend` folder.
+
+Redux Toolkit async thunks are used for:
+
+- Fetching categories
+- Fetching artists
+- Fetching events with artists and categories
+- Fetching event photos
+- Fetching seats
+- Fetching ticket categories
+- Buying tickets
+- Signing in and signing up users
+- Fetching users
+- Running admin create, update, and delete operations
+
+The Redux store keeps event data, selected seat, user session, user profile, ticket categories, admin data, seats, sold tickets, and event photos in a shared state tree.
+
+---
+
+## Ticket Purchase Flow
+
+The ticket purchase page loads the selected event, available seats, and ticket data.
+
+The user selects a seat from the seat map. After selection, the page shows:
+
+- Selected seat
+- Ticket category
+- Price
+- Venue
+- Event image
+
+When the user buys a ticket, the app updates the seat availability and marks the related ticket pricing record as sold.
+
+Past events are blocked from ticket purchase.
+
+---
+
+## Demo Event Support
+
+The project includes a local demo event utility for portfolio presentation.
+
+If an event is part of the demo list, the app can display fallback event details, images, photos, and ticket data without depending completely on live Supabase records.
+
+This keeps the public experience stable while still supporting real Supabase-backed data flows.
+
+---
+
+## Installation
+
+### Clone the repository
 
 ```bash
-git clone https://github.com/anilates97/ADOBilet-React.git
+git clone https://github.com/anilates97/React-ADOBilet.git
+cd React-ADOBilet
 ```
 
----
-
-## 2. Navigate to the Project Folder
-
-```bash
-cd ADOBilet-React
-```
-
----
-
-## 3. Install Dependencies
+### Install dependencies
 
 ```bash
 npm install
 ```
 
----
+### Configure environment variables
 
-## 4. Start the Development Server
+Create a `.env` file:
+
+```env
+REACT_APP_SUPABASE_URL=your_supabase_url
+REACT_APP_SUPABASE_KEY=your_supabase_anon_key
+```
+
+### Start the development server
 
 ```bash
 npm start
 ```
 
----
+### Build for production
 
-# Future Improvements
-
-- Authentication system
-- Payment integration
-- Ticket QR system
-- Event analytics dashboard
-- Backend API integration improvements
-- Role-based admin authorization
-- Improved mobile experience
+```bash
+npm run build
+```
 
 ---
 
-# Developer
+## Development Notes
 
-Anıl Hasan Ateş
+- Supabase client creation is isolated in `src/backend/supabase.js`.
+- Redux Toolkit is used for async data fetching and state updates.
+- User and admin access are handled with separate protected route components.
+- Admin access depends on the user's `authenticated_role` value from the database.
+- Ticket purchase updates seat availability and ticket sale state.
+- Demo events are merged with Supabase events for a more complete portfolio presentation.
+- Event image helpers provide fallback visuals when remote image data is missing.
+- The project still uses Create React App through `react-scripts`.
+
+---
+
+## Current Limitations
+
+- Some admin and ticket flows depend on the expected Supabase table structure.
+- Payment processing is simulated through ticket and seat state updates.
+- The project does not include a real payment gateway.
+- Demo event data is included for presentation stability.
+- Some older naming conventions from the original team project remain in the codebase.
+
+---
+
+## Developer
+
+**Anıl Hasan Ateş**
 
 - LinkedIn: https://linkedin.com/in/anilates97
 - GitHub: https://github.com/anilates97
